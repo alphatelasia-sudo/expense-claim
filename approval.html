@@ -147,7 +147,6 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8LdqzrE6gTirkZXM8CeQoBKmBLCqLKc2EBDM3JVa1BfrXS-8yOh4zouy33IQXZyVnyQ/exec';
 let claimData = null;
 
-// ── Apps Script Request ───────────────────────────────────────────
 function appsScriptRequest(params) {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error('timeout')), 15000);
@@ -163,16 +162,13 @@ function appsScriptRequest(params) {
   });
 }
 
-// ── Load claim data from URL params ──────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const docNo = params.get('docNo');
-
   if (!docNo) {
     showError('ไม่พบเลขที่เอกสาร กรุณาเปิดลิงก์จาก Lark อีกครั้ง');
     return;
   }
-
   try {
     const res = await appsScriptRequest({ action: 'getClaim', docNo: docNo });
     if (res.success && res.data) {
@@ -194,16 +190,14 @@ function renderClaim(data) {
   document.getElementById('infoProject').textContent = data.project || '-';
   document.getElementById('infoTotal').textContent =
     '฿ ' + parseFloat(data.total || 0).toLocaleString('th-TH', {minimumFractionDigits:2});
-
   const list = document.getElementById('itemsList');
   list.innerHTML = '';
   (data.items || []).filter(it => it.desc && it.amt).forEach(it => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.innerHTML = `<span class="item-desc">${it.desc}</span><span class="item-amt">฿ ${parseFloat(it.amt).toLocaleString('th-TH', {minimumFractionDigits:2})}</span>`;
+    row.innerHTML = '<span class="item-desc">' + it.desc + '</span><span class="item-amt">฿ ' + parseFloat(it.amt).toLocaleString('th-TH', {minimumFractionDigits:2}) + '</span>';
     list.appendChild(row);
   });
-
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
 }
@@ -216,25 +210,16 @@ function showError(msg) {
   document.getElementById('resultSub').textContent = msg;
 }
 
-// ── Submit decision ───────────────────────────────────────────────
 async function submitDecision(decision) {
   const approverName = document.getElementById('approverName').value.trim();
-  if (!approverName) {
-    alert('กรุณากรอกชื่อหัวหน้าส่วนก่อนครับ');
-    return;
-  }
-
+  if (!approverName) { alert('กรุณากรอกชื่อหัวหน้าส่วนก่อนครับ'); return; }
   const btns = document.querySelectorAll('.btn');
   btns.forEach(b => b.disabled = true);
-
   const payload = {
-    docNo: claimData.docNo,
-    decision,
-    approverName,
+    docNo: claimData.docNo, decision, approverName,
     comment: document.getElementById('approverComment').value.trim(),
     claimData
   };
-
   try {
     const res = await appsScriptRequest({ action: 'approvalDecision', data: JSON.stringify(payload) });
     if (res.success) {
