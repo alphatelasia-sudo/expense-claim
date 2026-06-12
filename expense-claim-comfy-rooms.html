@@ -750,10 +750,7 @@ async function fetchNextDocNo() {
   displayEl.textContent = '...';
 
   try {
-    const cbName = 'cb_getDocNo_' + Date.now();
-    const data = await jsonpRequest(
-      `${APPS_SCRIPT_URL}?action=getNextDocNo`, cbName
-    );
+    const data = await appsScriptRequest({ action: 'getNextDocNo' });
 
     if (data.success && data.docNo) {
       docInput.value = data.docNo;
@@ -863,11 +860,7 @@ async function saveForm() {
   btn.disabled = true;
 
   try {
-    const cbName = 'cb_save_' + Date.now();
-    const json = await jsonpRequest(
-      `${APPS_SCRIPT_URL}?action=saveClaim&data=${encodeURIComponent(JSON.stringify(data))}`,
-      cbName
-    );
+    const json = await appsScriptRequest({ action: 'saveClaim', data: JSON.stringify(data) });
 
     if (json.success) {
       localStorage.setItem('comfyRoomsLastSaved', JSON.stringify(data));
@@ -944,11 +937,7 @@ async function submitForApproval() {
   btn.disabled = true;
 
   try {
-    const cbName = 'cb_notify_' + Date.now();
-    const json = await jsonpRequest(
-      `${APPS_SCRIPT_URL}?action=notifyLark&data=${encodeURIComponent(JSON.stringify(data))}`,
-      cbName
-    );
+    const json = await appsScriptRequest({ action: 'notifyLark', data: JSON.stringify(data) });
     if (json.success) {
       showBanner(`✓ ส่งขออนุมัติ ${data.docNo} ไปที่หัวหน้าแล้ว`, 'success');
       btn.innerHTML = '✓ ส่งแล้ว';
