@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comfy Rooms – Expense Claim Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --paper: #fafaf7;
+    --cream: #f5f0e8;
+    --accent: #c8421a;
+    --accent-light: #f0e8e4;
+    --gold: #b8960c;
+    --line: #d8d4cc;
+    --success: #2d6a4f;
+    --border-radius: 2px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sarabun', 'IBM Plex Sans Thai', sans-serif;
+    background: #e8e4dc;
+    min-height: 100vh;
+    color: var(--ink);
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(0,0,0,0.03) 24px, rgba(0,0,0,0.03) 25px),
+      repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(0,0,0,0.03) 24px, rgba(0,0,0,0.03) 25px);
+  }
+
+  .app-shell {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 16px;
+  }
+
+  /* ── Top Bar ────────────────────────── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding: 0 4px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-logo {
+    width: 44px;
+    height: 44px;
+    background: var(--ink);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+  }
+  .brand-name { 
+    font-size: 14px; 
+    font-weight: 600; 
+    letter-spacing: 0.5px; 
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .brand-name span { 
+    display: block; 
+    font-size: 11px; 
+    font-weight: 400; 
+    color: var(--ink-light); 
+    letter-spacing: 1px; 
+    text-transform: uppercase;
+  }
+
+  /* ── Card ────────────────────────────── */
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  .card-header {
+    background: var(--ink);
+    color: white;
+    padding: 20px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-header-title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+  .card-header-sub {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .doc-id {
+    text-align: right;
+  }
+  .doc-id-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .doc-id-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    margin-top: 2px;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .card-body { padding: 28px; }
+
+  /* ── Section label ───────────────────── */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ── Grid layout ─────────────────────── */
+  .row { display: grid; gap: 16px; margin-bottom: 16px; }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .row-4 { grid-template-columns: 2fr 1fr 1fr 1fr; }
+
+  /* ── Form Fields ─────────────────────── */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+  }
+  .field input, .field select, .field textarea {
+    border: 1px solid var(--line);
+    border-radius: var(--border-radius);
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--ink);
+    background: white;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(26,26,46,0.08);
+  }
+  .field select { cursor: pointer; }
+
+  /* ── Objective Radio ─────────────────── */
+  .objective-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .obj-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.12s;
+    background: white;
+  }
+  .obj-option:hover { border-color: var(--ink); background: #f8f8f4; }
+  .obj-option.selected { 
+    border-color: var(--ink); 
+    background: var(--ink); 
+    color: white; 
+  }
+  .obj-option input[type="radio"] { display: none; }
+  .obj-check {
+    width: 14px; height: 14px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .obj-check::after {
+    content: '';
+    width: 6px; height: 6px;
+    background: currentColor;
+    border-radius: 50%;
+    opacity: 0;
+  }
+  .obj-option.selected .obj-check::after { opacity: 1; }
+
+  /* ── Divider ─────────────────────────── */
+  .divider {
+    height: 1px;
+    background: var(--line);
+    margin: 24px 0;
+  }
+
+  /* ── Items Table ─────────────────────── */
+  .items-table { width: 100%; border-collapse: collapse; }
+  .items-table thead tr {
+    background: var(--cream);
+    border-bottom: 2px solid var(--ink);
+  }
+  .items-table thead th {
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    white-space: nowrap;
+  }
+  .items-table thead th:first-child { width: 42px; text-align: center; }
+  .items-table thead th.amount-col { width: 140px; text-align: right; }
+  .items-table thead th.remark-col { width: 200px; }
+
+  .items-table tbody tr { border-bottom: 1px solid var(--line); }
+  .items-table tbody tr:last-child { border-bottom: none; }
+  .items-table tbody td { padding: 4px 6px; vertical-align: middle; }
+  .items-table tbody td:first-child { 
+    text-align: center; 
+    font-size: 11px; 
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink-light); 
+    padding: 0 6px;
+  }
+  .items-table tbody td input {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius);
+    padding: 7px 10px;
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--ink);
+    background: transparent;
+    outline: none;
+    transition: all 0.12s;
+  }
+  .items-table tbody td input:focus {
+    border-color: var(--ink);
+    background: white;
+    box-shadow: 0 0 0 2px rgba(26,26,46,0.07);
+  }
+  .items-table tbody td.amount-cell input {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+  .items-table tfoot tr { background: var(--cream); }
+  .items-table tfoot td { padding: 12px 10px; }
+  .items-table tfoot .total-label {
+    text-align: right;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    padding-right: 14px;
+  }
+  .items-table tfoot .total-value {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    padding-right: 10px;
+  }
+
+  /* ── Signature Section ───────────────── */
+  .sig-row {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+  }
+  .sig-col { padding: 20px; }
+  .sig-divider { background: var(--line); }
+  .sig-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+  }
+  .sig-sub { font-size: 12px; color: var(--ink-light); margin-bottom: 28px; }
+  .sig-line {
+    border-bottom: 1px solid var(--ink);
+    margin: 0 8px 6px;
+  }
+  .sig-name {
+    font-size: 12px;
+    color: var(--ink-light);
+    text-align: center;
+    font-style: italic;
+  }
+  .sig-date-label {
+    font-size: 10px;
+    color: var(--ink-light);
+    margin-top: 8px;
+    text-align: center;
+  }
+  .sig-date-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 4px 8px;
+    font-size: 13px;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--ink);
+    background: transparent;
+    outline: none;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .sig-date-input:focus { border-bottom-color: var(--ink); }
+
+  /* ── Action Bar ──────────────────────── */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+  .btn {
+    padding: 11px 24px;
+    border-radius: var(--border-radius);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Sarabun', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.12s;
+    border: none;
+    outline: none;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-light);
+  }
+  .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-primary {
+    background: var(--ink);
+    color: white;
+  }
+  .btn-primary:hover { background: #0f0f20; }
+  .btn-accent {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-accent:hover { background: #a83516; }
+  .btn-submit {
+    background: #1a6b3c;
+    color: white;
+  }
+  .btn-submit:hover { background: #145530; }
+  .btn svg { vertical-align: -3px; margin-right: 6px; }
+
+  /* ── Status Banner ───────────────────── */
+  .status-banner {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .status-banner.success {
+    display: flex;
+    background: #e8f5e9;
+    color: var(--success);
+    border: 1px solid #a5d6a7;
+  }
+  .status-banner.warn {
+    display: flex;
+    background: #fff8e1;
+    color: #7a5c00;
+    border: 1px solid #ffe082;
+  }
+
+  /* ══════════════════════════════════════
+     PRINT STYLES
+  ══════════════════════════════════════ */
+  @media print {
+    @page { margin: 15mm 15mm 15mm 15mm; size: A4; }
+    body { background: white !important; padding: 0; }
+    .app-shell { padding: 0; max-width: 100%; }
+    .top-bar, .action-bar, .status-banner { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #ccc; }
+    .card-body { padding: 20px; }
+
+    .obj-option { padding: 6px 8px; font-size: 11px; }
+    .items-table tbody td input { padding: 4px 8px; font-size: 12px; }
+    .field input, .field select { padding: 6px 10px; font-size: 12px; }
+
+    .items-table tbody td input,
+    .field input, .field select, .sig-date-input {
+      border-color: #ccc !important;
+      background: white !important;
+      box-shadow: none !important;
+    }
+  }
+
+  /* ── Responsive ──────────────────────── */
+  @media (max-width: 640px) {
+    .row-2, .row-3, .row-4 { grid-template-columns: 1fr; }
+    .objective-grid { grid-template-columns: 1fr 1fr; }
+    .sig-row { grid-template-columns: 1fr; }
+    .sig-divider { display: none; }
+    .card-header { flex-direction: column; gap: 12px; text-align: center; }
+    .doc-id { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="brand">
+      <div class="brand-logo">CR</div>
+      <div class="brand-name">
+        Comfy Rooms Hospitality
+        <span>Expense Management</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--ink-light);">
+      ระบบขอเบิกค่าใช้จ่าย
+    </div>
+  </div>
+
+  <!-- Status Banner -->
+  <div class="status-banner" id="statusBanner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="statusText">บันทึกสำเร็จ</span>
+  </div>
+
+  <!-- Main Card -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-header-title">Comfy Rooms Hospitality Co., Ltd.</div>
+        <div class="card-header-sub">ใบขอเบิกค่าใช้จ่าย / Expense Claim Form</div>
+      </div>
+      <div class="doc-id">
+        <div class="doc-id-label">Doc No.</div>
+        <div class="doc-id-value" id="displayDocNo">RC-</div>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Section 1: Request Info -->
+      <div class="section-label">ข้อมูลผู้ขอเบิก / Requester Info</div>
+
+      <div class="row row-4">
+        <div class="field">
+          <label>ชื่อผู้เบิก / Request By</label>
+          <input type="text" id="requestBy" placeholder="ชื่อ-นามสกุล" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>วันที่ / Date</label>
+          <input type="date" id="requestDate" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>ถึง / To</label>
+          <select id="toField" onchange="updatePreview()">
+            <option value="Accounting">Accounting</option>
+            <option value="กรรมการบริหาร">กรรมการบริหาร</option>
+            <option value="Management">Management</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>สำเนาถึง / CC</label>
+          <select id="ccField" onchange="updatePreview()">
+            <option value="-">-</option>
+            <option value="กรรมการบริหาร">กรรมการบริหาร</option>
+            <option value="Management">Management</option>
+            <option value="Accounting">Accounting</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row row-2">
+        <div class="field">
+          <label>เลขที่เอกสาร / Doc No.</label>
+          <input type="text" id="docNo" placeholder="RC-2506001" oninput="syncDocNo()">
+        </div>
+        <div class="field">
+          <label>กำหนดรับเงิน / Request Receive Date</label>
+          <input type="date" id="receiveDate" oninput="updatePreview()">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Section 2: Objective -->
+      <div class="section-label">วัตถุประสงค์ / Objective</div>
+
+      <div class="objective-grid" id="objectiveGrid" style="margin-bottom:14px;">
+        <label class="obj-option" onclick="selectObj(this, 'เบิกเงินโครงการ')">
+          <input type="radio" name="objective" value="เบิกเงินโครงการ">
+          <div class="obj-check"></div>
+          เบิกเงินโครงการ
+        </label>
+        <label class="obj-option" onclick="selectObj(this, 'เพื่อการเดินทาง (Business Trip)')">
+          <input type="radio" name="objective" value="เพื่อการเดินทาง (Business Trip)">
+          <div class="obj-check"></div>
+          เพื่อการเดินทาง
+        </label>
+        <label class="obj-option" onclick="selectObj(this, 'เงินทดรองจ่าย (Advance)')">
+          <input type="radio" name="objective" value="เงินทดรองจ่าย (Advance)">
+          <div class="obj-check"></div>
+          เงินทดรองจ่าย
+        </label>
+        <label class="obj-option" onclick="selectObj(this, 'อื่นๆ (Others)')">
+          <input type="radio" name="objective" value="อื่นๆ (Others)">
+          <div class="obj-check"></div>
+          อื่นๆ
+        </label>
+        <label class="obj-option" onclick="selectObj(this, 'ค่าจ้างฟรีแลนซ์')">
+          <input type="radio" name="objective" value="ค่าจ้างฟรีแลนซ์">
+          <div class="obj-check"></div>
+          ค่าจ้างฟรีแลนซ์
+        </label>
+        <label class="obj-option" onclick="selectObj(this, 'Petty Cash')">
+          <input type="radio" name="objective" value="Petty Cash">
+          <div class="obj-check"></div>
+          Petty Cash
+        </label>
+      </div>
+
+      <div class="row row-3">
+        <div class="field" style="grid-column: span 2;">
+          <label>รายละเอียด / Description (Other Objective)</label>
+          <input type="text" id="otherObjective" placeholder="ระบุรายละเอียดเพิ่มเติม" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>Sale Order / Project</label>
+          <input type="text" id="project" placeholder="ชื่อโปรเจกต์หรือ SO" oninput="updatePreview()">
+        </div>
+      </div>
+
+      <div class="row row-2" id="tripRow" style="display:none;">
+        <div class="field">
+          <label>ตั้งแต่วันที่ / From Date</label>
+          <input type="date" id="fromDate">
+        </div>
+        <div class="field">
+          <label>ถึงวันที่ / To Date</label>
+          <input type="date" id="toDate">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Section 3: Items -->
+      <div class="section-label">รายการค่าใช้จ่าย / Expense Items</div>
+
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>รายการ / Description</th>
+            <th class="amount-col">จำนวนเงิน / Amount (฿)</th>
+            <th class="remark-col">หมายเหตุ / Remark</th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody">
+          <!-- generated by JS -->
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" class="total-label">รวมทั้งสิ้น / Total</td>
+            <td class="total-value" id="totalDisplay">0.00</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="divider"></div>
+
+      <!-- Section 4: Signatures -->
+      <div class="section-label">ลายมือชื่อ / Signatures</div>
+
+      <div class="sig-row">
+        <div class="sig-col">
+          <div class="sig-title">ผู้เบิก</div>
+          <div class="sig-sub">Reimburse By</div>
+          <div class="sig-line"></div>
+          <div class="sig-name" id="sigName">( ............................................. )</div>
+          <div class="sig-date-label">วันที่ / Date</div>
+          <input class="sig-date-input" type="date" id="sigDate1">
+        </div>
+        <div class="sig-divider"></div>
+        <div class="sig-col">
+          <div class="sig-title">หัวหน้าส่วน</div>
+          <div class="sig-sub">Department MGR</div>
+          <div class="sig-line"></div>
+          <div class="sig-name">( ............................................. )</div>
+          <div class="sig-date-label">วันที่ / Date</div>
+          <input class="sig-date-input" type="date" id="sigDate2">
+        </div>
+        <div class="sig-divider"></div>
+        <div class="sig-col">
+          <div class="sig-title">กรรมการ</div>
+          <div class="sig-sub">Director</div>
+          <div class="sig-line"></div>
+          <div class="sig-name">( ............................................. )</div>
+          <div class="sig-date-label">วันที่ / Date</div>
+          <input class="sig-date-input" type="date" id="sigDate3">
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <button class="btn btn-ghost" onclick="clearForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.56"/></svg>
+          ล้างฟอร์ม
+        </button>
+        <button class="btn btn-primary" onclick="saveForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          บันทึก
+        </button>
+        <button class="btn btn-submit" onclick="submitForApproval()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          ยื่นขออนุมัติ
+        </button>
+        <button class="btn btn-accent" onclick="printForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          พิมพ์ส่งบัญชี
+        </button>
+      </div>
+
+    </div><!-- /card-body -->
+  </div><!-- /card -->
+
+</div><!-- /app-shell -->
+
+<script>
+// ── Config ────────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8LdqzrE6gTirkZXM8CeQoBKmBLCqLKc2EBDM3JVa1BfrXS-8yOh4zouy33IQXZyVnyQ/exec';
+const NUM_ITEMS = 9;
+let selectedObjective = '';
+
+// ── Init ─────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  buildItemRows();
+  setDefaultDates();
+  fetchNextDocNo();
+});
+
+function buildItemRows() {
+  const tbody = document.getElementById('itemsBody');
+  tbody.innerHTML = '';
+  for (let i = 1; i <= NUM_ITEMS; i++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i}</td>
+      <td><input type="text" id="item${i}_desc" placeholder="รายการที่ ${i}" oninput="calcTotal()"></td>
+      <td class="amount-cell"><input type="number" id="item${i}_amt" placeholder="0.00" min="0" step="0.01" oninput="calcTotal()"></td>
+      <td><input type="text" id="item${i}_rmk" placeholder="-"></td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function setDefaultDates() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('requestDate').value = today;
+  document.getElementById('sigDate1').value = today;
+}
+
+// ── JSONP helper (แก้ปัญหา CORS กับ Apps Script) ─────────────────
+function jsonpRequest(url, callbackName) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('timeout'));
+    }, 10000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      const el = document.getElementById('jsonp_' + callbackName);
+      if (el) el.remove();
+    }
+
+    window[callbackName] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+
+    const script = document.createElement('script');
+    script.id = 'jsonp_' + callbackName;
+    script.src = url + '&callback=' + callbackName;
+    script.onerror = () => { cleanup(); reject(new Error('script error')); };
+    document.head.appendChild(script);
+  });
+}
+
+// ── Google Sheets: ดึงเลข Doc No. ────────────────────────────────
+async function fetchNextDocNo() {
+  const docInput = document.getElementById('docNo');
+  const displayEl = document.getElementById('displayDocNo');
+
+  docInput.value = 'กำลังโหลด...';
+  docInput.disabled = true;
+  displayEl.textContent = '...';
+
+  try {
+    const data = await appsScriptRequest({ action: 'getNextDocNo' });
+
+    if (data.success && data.docNo) {
+      docInput.value = data.docNo;
+      displayEl.textContent = data.docNo;
+      showBanner(`✓ เลขที่เอกสาร ${data.docNo} พร้อมใช้งาน`, 'success');
+    } else {
+      throw new Error(data.error || 'ไม่สามารถดึงเลขได้');
+    }
+  } catch (err) {
+    const yr = new Date().getFullYear().toString().slice(2);
+    const mo = String(new Date().getMonth()+1).padStart(2,'0');
+    const fallback = `RC-${yr}${mo}???`;
+    docInput.value = fallback;
+    displayEl.textContent = fallback;
+    showBanner('⚠ เชื่อมต่อ Google Sheets ไม่ได้ — กรุณากรอกเลขที่เอกสารเอง', 'warn');
+  } finally {
+    docInput.disabled = false;
+  }
+}
+
+// ── Objective ────────────────────────────────────────────────────
+function selectObj(el, val) {
+  document.querySelectorAll('.obj-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedObjective = val;
+  document.getElementById('tripRow').style.display =
+    val === 'เพื่อการเดินทาง (Business Trip)' ? 'grid' : 'none';
+  updatePreview();
+}
+
+// ── Calculations ─────────────────────────────────────────────────
+function calcTotal() {
+  let total = 0;
+  for (let i = 1; i <= NUM_ITEMS; i++) {
+    const v = parseFloat(document.getElementById(`item${i}_amt`)?.value || 0);
+    if (!isNaN(v)) total += v;
+  }
+  document.getElementById('totalDisplay').textContent =
+    total.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return total;
+}
+
+// ── Doc No sync ───────────────────────────────────────────────────
+function syncDocNo() {
+  const val = document.getElementById('docNo').value.trim();
+  document.getElementById('displayDocNo').textContent = val || 'RC-';
+}
+
+// ── Update preview ────────────────────────────────────────────────
+function updatePreview() {
+  const name = document.getElementById('requestBy').value;
+  document.getElementById('sigName').textContent =
+    name ? `( ${name} )` : '( ............................................. )';
+  syncDocNo();
+}
+
+// ── Collect data ──────────────────────────────────────────────────
+function collectData() {
+  const items = [];
+  for (let i = 1; i <= NUM_ITEMS; i++) {
+    items.push({
+      desc: document.getElementById(`item${i}_desc`)?.value || '',
+      amt:  document.getElementById(`item${i}_amt`)?.value  || '',
+      rmk:  document.getElementById(`item${i}_rmk`)?.value  || ''
+    });
+  }
+  return {
+    docNo:          document.getElementById('docNo').value,
+    requestBy:      document.getElementById('requestBy').value,
+    requestDate:    document.getElementById('requestDate').value,
+    toField:        document.getElementById('toField').value,
+    ccField:        document.getElementById('ccField').value,
+    receiveDate:    document.getElementById('receiveDate').value,
+    objective:      selectedObjective,
+    otherObjective: document.getElementById('otherObjective').value,
+    project:        document.getElementById('project').value,
+    fromDate:       document.getElementById('fromDate').value,
+    toDate:         document.getElementById('toDate').value,
+    sigDate1:       document.getElementById('sigDate1').value,
+    sigDate2:       document.getElementById('sigDate2').value,
+    sigDate3:       document.getElementById('sigDate3').value,
+    total:          calcTotal(),
+    items
+  };
+}
+
+// ── Save → Google Sheets ──────────────────────────────────────────
+async function saveForm() {
+  const data = collectData();
+
+  // Validate
+  if (!data.requestBy.trim()) {
+    showBanner('⚠ กรุณากรอกชื่อผู้เบิกก่อน', 'warn'); return;
+  }
+  if (!data.docNo.trim() || data.docNo.includes('???')) {
+    showBanner('⚠ กรุณาระบุเลขที่เอกสารก่อน', 'warn'); return;
+  }
+  const hasItem = data.items.some(it => it.desc.trim() && it.amt);
+  if (!hasItem) {
+    showBanner('⚠ กรุณากรอกรายการค่าใช้จ่ายอย่างน้อย 1 รายการ', 'warn'); return;
+  }
+
+  // แสดงสถานะกำลังบันทึก
+  const btn = document.querySelector('.btn-primary');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> กำลังบันทึก...';
+  btn.disabled = true;
+
+  try {
+    const json = await appsScriptRequest({ action: 'saveClaim', data: JSON.stringify(data) });
+
+    if (json.success) {
+      localStorage.setItem('comfyRoomsLastSaved', JSON.stringify(data));
+      showBanner(`✓ บันทึก ${data.docNo} ลง Google Sheets สำเร็จ`, 'success');
+    } else {
+      throw new Error(json.error || 'บันทึกไม่สำเร็จ');
+    }
+  } catch (err) {
+    // fallback บันทึก local แทน
+    localStorage.setItem('comfyRoomsLastSaved', JSON.stringify(data));
+    showBanner('⚠ ไม่สามารถเชื่อมต่อ Sheets — บันทึกในเครื่องไว้ก่อนแล้ว', 'warn');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
+// ── Clear ─────────────────────────────────────────────────────────
+function clearForm() {
+  if (!confirm('ล้างข้อมูลและขอเลขที่เอกสารใหม่?')) return;
+  document.querySelectorAll('input:not([type=radio]), select').forEach(el => {
+    if (el.id !== 'docNo') el.value = '';
+  });
+  document.querySelectorAll('.obj-option').forEach(o => o.classList.remove('selected'));
+  selectedObjective = '';
+  document.getElementById('tripRow').style.display = 'none';
+  setDefaultDates();
+  calcTotal();
+  updatePreview();
+  // ขอเลขใหม่จาก Sheets
+  fetchNextDocNo();
+}
+
+// ── Print ─────────────────────────────────────────────────────────
+async function printForm() {
+  await saveForm();
+  // รอให้ banner แสดงก่อนสักครู่
+  setTimeout(() => window.print(), 500);
+}
+
+// ── Banner ────────────────────────────────────────────────────────
+function showBanner(msg, type = 'success') {
+  const b = document.getElementById('statusBanner');
+  document.getElementById('statusText').textContent = msg;
+  b.style.display = 'flex';
+  b.className = `status-banner ${type}`;
+  clearTimeout(b._timer);
+  const dur = type === 'warn' ? 6000 : 4000;
+  b._timer = setTimeout(() => { b.style.display = 'none'; }, dur);
+}
+
+// ── Submit for Approval → Lark ────────────────────────────────────
+async function submitForApproval() {
+  const data = collectData();
+
+  // Validate
+  if (!data.requestBy.trim()) {
+    showBanner('⚠ กรุณากรอกชื่อผู้เบิกก่อน', 'warn'); return;
+  }
+  if (!data.docNo.trim() || data.docNo.includes('???')) {
+    showBanner('⚠ กรุณาระบุเลขที่เอกสารก่อน', 'warn'); return;
+  }
+  const hasItem = data.items.some(it => it.desc.trim() && it.amt);
+  if (!hasItem) {
+    showBanner('⚠ กรุณากรอกรายการค่าใช้จ่ายอย่างน้อย 1 รายการ', 'warn'); return;
+  }
+
+  // Save first
+  await saveForm();
+
+  const btn = document.querySelector('.btn-submit');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '⏳ กำลังส่ง...';
+  btn.disabled = true;
+
+  try {
+    const json = await appsScriptRequest({ action: 'notifyLark', data: JSON.stringify(data) });
+    if (json.success) {
+      showBanner(`✓ ส่งขออนุมัติ ${data.docNo} ไปที่หัวหน้าแล้ว`, 'success');
+      btn.innerHTML = '✓ ส่งแล้ว';
+      btn.disabled = true;
+    } else {
+      throw new Error(json.error || 'ส่งไม่สำเร็จ');
+    }
+  } catch(err) {
+    showBanner('⚠ ส่ง notification ไม่สำเร็จ: ' + err.message, 'warn');
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
