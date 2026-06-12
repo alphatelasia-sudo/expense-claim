@@ -712,31 +712,19 @@ function setDefaultDates() {
   document.getElementById('sigDate1').value = today;
 }
 
-// ── JSONP helper (แก้ปัญหา CORS กับ Apps Script) ─────────────────
-function jsonpRequest(url, callbackName) {
+// ── Apps Script Request ───────────────────────────────────────────
+function appsScriptRequest(params) {
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('timeout'));
-    }, 10000);
-
-    function cleanup() {
-      clearTimeout(timeout);
-      delete window[callbackName];
-      const el = document.getElementById('jsonp_' + callbackName);
-      if (el) el.remove();
-    }
-
-    window[callbackName] = function(data) {
-      cleanup();
-      resolve(data);
-    };
-
-    const script = document.createElement('script');
-    script.id = 'jsonp_' + callbackName;
-    script.src = url + '&callback=' + callbackName;
-    script.onerror = () => { cleanup(); reject(new Error('script error')); };
-    document.head.appendChild(script);
+    const timeout = setTimeout(() => reject(new Error('timeout')), 15000);
+    const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+    fetch(url, { redirect: 'follow' })
+      .then(r => r.text())
+      .then(text => {
+        clearTimeout(timeout);
+        try { resolve(JSON.parse(text)); }
+        catch(e) { reject(new Error('parse error: ' + text.substring(0, 100))); }
+      })
+      .catch(err => { clearTimeout(timeout); reject(err); });
   });
 }
 
@@ -750,10 +738,7 @@ async function fetchNextDocNo() {
   displayEl.textContent = '...';
 
   try {
-    const cbName = 'cb_getDocNo_' + Date.now();
-    const data = await jsonpRequest(
-      `${APPS_SCRIPT_URL}?action=getNextDocNo`, cbName
-    );
+    const data = await appsScriptRequest({ action: 'getNextDocNo' });
 
     if (data.success && data.docNo) {
       docInput.value = data.docNo;
@@ -863,11 +848,7 @@ async function saveForm() {
   btn.disabled = true;
 
   try {
-    const cbName = 'cb_save_' + Date.now();
-    const json = await jsonpRequest(
-      `${APPS_SCRIPT_URL}?action=saveClaim&data=${encodeURIComponent(JSON.stringify(data))}`,
-      cbName
-    );
+    const json = await appsScriptRequest({ action: 'saveClaim', data: JSON.stringify(data) });
 
     if (json.success) {
       localStorage.setItem('comfyRoomsLastSaved', JSON.stringify(data));
@@ -944,11 +925,7 @@ async function submitForApproval() {
   btn.disabled = true;
 
   try {
-    const cbName = 'cb_notify_' + Date.now();
-    const json = await jsonpRequest(
-      `${APPS_SCRIPT_URL}?action=notifyLark&data=${encodeURIComponent(JSON.stringify(data))}`,
-      cbName
-    );
+    const json = await appsScriptRequest({ action: 'notifyLark', data: JSON.stringify(data) });
     if (json.success) {
       showBanner(`✓ ส่งขออนุมัติ ${data.docNo} ไปที่หัวหน้าแล้ว`, 'success');
       btn.innerHTML = '✓ ส่งแล้ว';
