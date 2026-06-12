@@ -684,6 +684,22 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8LdqzrE6gTirk
 const NUM_ITEMS = 9;
 let selectedObjective = '';
 
+// ── Apps Script Request ───────────────────────────────────────────
+function appsScriptRequest(params) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('timeout')), 15000);
+    const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+    fetch(url, { redirect: 'follow' })
+      .then(r => r.text())
+      .then(text => {
+        clearTimeout(timeout);
+        try { resolve(JSON.parse(text)); }
+        catch(e) { reject(new Error('parse error: ' + text.substring(0, 100))); }
+      })
+      .catch(err => { clearTimeout(timeout); reject(err); });
+  });
+}
+
 // ── Init ─────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   buildItemRows();
@@ -712,57 +728,26 @@ function setDefaultDates() {
   document.getElementById('sigDate1').value = today;
 }
 
-// ── JSONP helper (แก้ปัญหา CORS กับ Apps Script) ─────────────────
-function jsonpRequest(url, callbackName) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('timeout'));
-    }, 10000);
-
-    function cleanup() {
-      clearTimeout(timeout);
-      delete window[callbackName];
-      const el = document.getElementById('jsonp_' + callbackName);
-      if (el) el.remove();
-    }
-
-    window[callbackName] = function(data) {
-      cleanup();
-      resolve(data);
-    };
-
-    const script = document.createElement('script');
-    script.id = 'jsonp_' + callbackName;
-    script.src = url + '&callback=' + callbackName;
-    script.onerror = () => { cleanup(); reject(new Error('script error')); };
-    document.head.appendChild(script);
-  });
-}
-
-// ── Google Sheets: ดึงเลข Doc No. ────────────────────────────────
+// ── Fetch Doc No. ─────────────────────────────────────────────────
 async function fetchNextDocNo() {
   const docInput = document.getElementById('docNo');
   const displayEl = document.getElementById('displayDocNo');
-
   docInput.value = 'กำลังโหลด...';
   docInput.disabled = true;
   displayEl.textContent = '...';
-
   try {
     const data = await appsScriptRequest({ action: 'getNextDocNo' });
-
     if (data.success && data.docNo) {
       docInput.value = data.docNo;
       displayEl.textContent = data.docNo;
-      showBanner(`✓ เลขที่เอกสาร ${data.docNo} พร้อมใช้งาน`, 'success');
+      showBanner('✓ เลขที่เอกสาร ' + data.docNo + ' พร้อมใช้งาน', 'success');
     } else {
       throw new Error(data.error || 'ไม่สามารถดึงเลขได้');
     }
   } catch (err) {
     const yr = new Date().getFullYear().toString().slice(2);
     const mo = String(new Date().getMonth()+1).padStart(2,'0');
-    const fallback = `RC-${yr}${mo}???`;
+    const fallback = 'RC-' + yr + mo + '???';
     docInput.value = fallback;
     displayEl.textContent = fallback;
     showBanner('⚠ เชื่อมต่อ Google Sheets ไม่ได้ — กรุณากรอกเลขที่เอกสารเอง', 'warn');
@@ -785,7 +770,7 @@ function selectObj(el, val) {
 function calcTotal() {
   let total = 0;
   for (let i = 1; i <= NUM_ITEMS; i++) {
-    const v = parseFloat(document.getElementById(`item${i}_amt`)?.value || 0);
+    const v = parseFloat(document.getElementById('item'+i+'_amt')?.value || 0);
     if (!isNaN(v)) total += v;
   }
   document.getElementById('totalDisplay').textContent =
@@ -793,17 +778,15 @@ function calcTotal() {
   return total;
 }
 
-// ── Doc No sync ───────────────────────────────────────────────────
 function syncDocNo() {
   const val = document.getElementById('docNo').value.trim();
   document.getElementById('displayDocNo').textContent = val || 'RC-';
 }
 
-// ── Update preview ────────────────────────────────────────────────
 function updatePreview() {
   const name = document.getElementById('requestBy').value;
   document.getElementById('sigName').textContent =
-    name ? `( ${name} )` : '( ............................................. )';
+    name ? '( ' + name + ' )' : '( ............................................. )';
   syncDocNo();
 }
 
@@ -812,9 +795,9 @@ function collectData() {
   const items = [];
   for (let i = 1; i <= NUM_ITEMS; i++) {
     items.push({
-      desc: document.getElementById(`item${i}_desc`)?.value || '',
-      amt:  document.getElementById(`item${i}_amt`)?.value  || '',
-      rmk:  document.getElementById(`item${i}_rmk`)?.value  || ''
+      desc: document.getElementById('item'+i+'_desc')?.value || '',
+      amt:  document.getElementById('item'+i+'_amt')?.value  || '',
+      rmk:  document.getElementById('item'+i+'_rmk')?.value  || ''
     });
   }
   return {
@@ -837,43 +820,60 @@ function collectData() {
   };
 }
 
-// ── Save → Google Sheets ──────────────────────────────────────────
+// ── Save ──────────────────────────────────────────────────────────
 async function saveForm() {
   const data = collectData();
-
-  // Validate
-  if (!data.requestBy.trim()) {
-    showBanner('⚠ กรุณากรอกชื่อผู้เบิกก่อน', 'warn'); return;
-  }
-  if (!data.docNo.trim() || data.docNo.includes('???')) {
-    showBanner('⚠ กรุณาระบุเลขที่เอกสารก่อน', 'warn'); return;
-  }
+  if (!data.requestBy.trim()) { showBanner('⚠ กรุณากรอกชื่อผู้เบิกก่อน', 'warn'); return; }
+  if (!data.docNo.trim() || data.docNo.includes('???')) { showBanner('⚠ กรุณาระบุเลขที่เอกสารก่อน', 'warn'); return; }
   const hasItem = data.items.some(it => it.desc.trim() && it.amt);
-  if (!hasItem) {
-    showBanner('⚠ กรุณากรอกรายการค่าใช้จ่ายอย่างน้อย 1 รายการ', 'warn'); return;
-  }
+  if (!hasItem) { showBanner('⚠ กรุณากรอกรายการค่าใช้จ่ายอย่างน้อย 1 รายการ', 'warn'); return; }
 
-  // แสดงสถานะกำลังบันทึก
   const btn = document.querySelector('.btn-primary');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> กำลังบันทึก...';
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '⏳ กำลังบันทึก...';
   btn.disabled = true;
-
   try {
     const json = await appsScriptRequest({ action: 'saveClaim', data: JSON.stringify(data) });
-
     if (json.success) {
       localStorage.setItem('comfyRoomsLastSaved', JSON.stringify(data));
-      showBanner(`✓ บันทึก ${data.docNo} ลง Google Sheets สำเร็จ`, 'success');
+      showBanner('✓ บันทึก ' + data.docNo + ' ลง Google Sheets สำเร็จ', 'success');
     } else {
       throw new Error(json.error || 'บันทึกไม่สำเร็จ');
     }
   } catch (err) {
-    // fallback บันทึก local แทน
     localStorage.setItem('comfyRoomsLastSaved', JSON.stringify(data));
     showBanner('⚠ ไม่สามารถเชื่อมต่อ Sheets — บันทึกในเครื่องไว้ก่อนแล้ว', 'warn');
   } finally {
-    btn.innerHTML = originalText;
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+  }
+}
+
+// ── Submit for Approval ───────────────────────────────────────────
+async function submitForApproval() {
+  const data = collectData();
+  if (!data.requestBy.trim()) { showBanner('⚠ กรุณากรอกชื่อผู้เบิกก่อน', 'warn'); return; }
+  if (!data.docNo.trim() || data.docNo.includes('???')) { showBanner('⚠ กรุณาระบุเลขที่เอกสารก่อน', 'warn'); return; }
+  const hasItem = data.items.some(it => it.desc.trim() && it.amt);
+  if (!hasItem) { showBanner('⚠ กรุณากรอกรายการค่าใช้จ่ายอย่างน้อย 1 รายการ', 'warn'); return; }
+
+  await saveForm();
+
+  const btn = document.querySelector('.btn-submit');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '⏳ กำลังส่ง...';
+  btn.disabled = true;
+  try {
+    const json = await appsScriptRequest({ action: 'notifyLark', data: JSON.stringify(data) });
+    if (json.success) {
+      showBanner('✓ ส่งขออนุมัติ ' + data.docNo + ' ไปที่หัวหน้าแล้ว', 'success');
+      btn.innerHTML = '✓ ส่งแล้ว';
+    } else {
+      throw new Error(json.error || 'ส่งไม่สำเร็จ');
+    }
+  } catch(err) {
+    showBanner('⚠ ส่ง notification ไม่สำเร็จ: ' + err.message, 'warn');
+    btn.innerHTML = originalHTML;
     btn.disabled = false;
   }
 }
@@ -890,14 +890,12 @@ function clearForm() {
   setDefaultDates();
   calcTotal();
   updatePreview();
-  // ขอเลขใหม่จาก Sheets
   fetchNextDocNo();
 }
 
 // ── Print ─────────────────────────────────────────────────────────
 async function printForm() {
   await saveForm();
-  // รอให้ banner แสดงก่อนสักครู่
   setTimeout(() => window.print(), 500);
 }
 
@@ -906,50 +904,9 @@ function showBanner(msg, type = 'success') {
   const b = document.getElementById('statusBanner');
   document.getElementById('statusText').textContent = msg;
   b.style.display = 'flex';
-  b.className = `status-banner ${type}`;
+  b.className = 'status-banner ' + type;
   clearTimeout(b._timer);
-  const dur = type === 'warn' ? 6000 : 4000;
-  b._timer = setTimeout(() => { b.style.display = 'none'; }, dur);
-}
-
-// ── Submit for Approval → Lark ────────────────────────────────────
-async function submitForApproval() {
-  const data = collectData();
-
-  // Validate
-  if (!data.requestBy.trim()) {
-    showBanner('⚠ กรุณากรอกชื่อผู้เบิกก่อน', 'warn'); return;
-  }
-  if (!data.docNo.trim() || data.docNo.includes('???')) {
-    showBanner('⚠ กรุณาระบุเลขที่เอกสารก่อน', 'warn'); return;
-  }
-  const hasItem = data.items.some(it => it.desc.trim() && it.amt);
-  if (!hasItem) {
-    showBanner('⚠ กรุณากรอกรายการค่าใช้จ่ายอย่างน้อย 1 รายการ', 'warn'); return;
-  }
-
-  // Save first
-  await saveForm();
-
-  const btn = document.querySelector('.btn-submit');
-  const originalHTML = btn.innerHTML;
-  btn.innerHTML = '⏳ กำลังส่ง...';
-  btn.disabled = true;
-
-  try {
-    const json = await appsScriptRequest({ action: 'notifyLark', data: JSON.stringify(data) });
-    if (json.success) {
-      showBanner(`✓ ส่งขออนุมัติ ${data.docNo} ไปที่หัวหน้าแล้ว`, 'success');
-      btn.innerHTML = '✓ ส่งแล้ว';
-      btn.disabled = true;
-    } else {
-      throw new Error(json.error || 'ส่งไม่สำเร็จ');
-    }
-  } catch(err) {
-    showBanner('⚠ ส่ง notification ไม่สำเร็จ: ' + err.message, 'warn');
-    btn.innerHTML = originalHTML;
-    btn.disabled = false;
-  }
+  b._timer = setTimeout(() => { b.style.display = 'none'; }, type === 'warn' ? 6000 : 4000);
 }
 </script>
 </body>
