@@ -783,15 +783,38 @@ function analyze(){
     </tr></tbody></table></div>`;
 
     if(totROI!==null){
+      const budgetPct=totR>0?Math.round(totC/totR*100):null;
+      // Industry benchmark: Marketing spend as % of revenue
+      // Good: <15%, Acceptable: 15-25%, High: 25-35%, Too high: >35%
+      const budgetPctLabel=budgetPct===null?'':budgetPct<=15?'✓ ดีมาก (ต่ำกว่า 15%)':budgetPct<=25?'✓ อยู่ในเกณฑ์ (15-25%)':budgetPct<=35?'⚠ ค่อนข้างสูง (25-35%)':'🚨 สูงมาก (>35%)';
+      const budgetPctColor=budgetPct===null?'':budgetPct<=15?'var(--green)':budgetPct<=25?'var(--ink)':budgetPct<=35?'var(--amber)':'var(--red)';
+
       h+=`<div class="note" style="margin-top:10px"><strong>วิธีคิด:</strong><br>
         รายได้รวม = ${totB} Booking × ${ni} คืน × ฿${fmt(adr)} = ฿${fmt(totR)}<br>
-        ROI = (฿${fmt(totR)} − ฿${fmt(totC)}) ÷ ฿${fmt(totC)} × 100 = <strong>${totROI}%</strong>
+        ROI = (฿${fmt(totR)} − ฿${fmt(totC)}) ÷ ฿${fmt(totC)} × 100 = <strong>${totROI}%</strong><br>
+        งบการตลาด % ของรายได้ = ฿${fmt(totC)} ÷ ฿${fmt(totR)} × 100 = <strong>${budgetPct}%</strong>
+        ${budgetPct!==null?`<br><span style="font-size:11.5px;color:var(--muted)">Benchmark: ดีมาก &lt;15% · อยู่ในเกณฑ์ 15-25% · ค่อนข้างสูง 25-35% · สูงมาก &gt;35%</span>`:''}
       </div>`;
-      const bClass=hasBadSanity?'bsum-bad':hasWarnSanity?'bsum-warn':totROI>=0?'bsum-good':'bsum-bad';
-      const bMsg=hasBadSanity?'⚠ ROI นี้อาจสูงเกินจริง เนื่องจาก Booking บาง Channel ไม่สมเหตุสมผล':hasWarnSanity?'ROI นี้เป็น Optimistic Scenario — Realistic จะต่ำกว่านี้':totROI>=0?'คุ้มค่าตาม Booking ที่ตั้งไว้ ✓':'ยังไม่คุ้มทุน — ควรทบทวน Booking หรืองบประมาณ';
-      h+=`<div class="bsum ${bClass}">
+
+      // Metric summary row: budget, revenue, %, ROI
+      h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px;margin-bottom:12px">
+        <div class="met"><div class="met-n">฿${fmt(totC)}</div><div class="met-l">งบการตลาดรวม/เดือน</div></div>
+        <div class="met"><div class="met-n">฿${fmt(totR)}</div><div class="met-l">รายได้คาดการณ์/เดือน</div></div>
+        <div class="met"><div class="met-n" style="color:${budgetPctColor}">${budgetPct!==null?budgetPct+'%':'—'}</div><div class="met-l">% งบต่อรายได้คาด</div></div>
+        <div class="met"><div class="met-n" style="color:${totROI>=0?'var(--green)':'var(--red)'}">${totROI}%</div><div class="met-l">ROI</div></div>
+      </div>`;
+
+      if(budgetPct!==null){
+        h+=`<div class="rrow" style="border-top:1px solid var(--line)"><span class="rk">งบการตลาดรวม/เดือน</span><span class="rv">฿${fmt(totC)}</span></div>
+        <div class="rrow"><span class="rk">รายได้คาดการณ์จาก Marketing</span><span class="rv">฿${fmt(totR)}</span></div>
+        <div class="rrow"><span class="rk">งบการตลาด คิดเป็น % ของรายได้คาด</span><span class="rv" style="color:${budgetPctColor};font-size:16px;font-weight:600">${budgetPct}% <span style="font-size:12px;font-weight:400">${budgetPctLabel}</span></span></div>`;
+      }
+
+      const bClass=hasBadSanity?'bsum-bad':hasWarnSanity?'bsum-warn':totROI>=0&&budgetPct<=25?'bsum-good':totROI>=0?'bsum-warn':'bsum-bad';
+      const bMsg=hasBadSanity?'⚠ ROI นี้อาจสูงเกินจริง เนื่องจาก Booking บาง Channel ไม่สมเหตุสมผล':hasWarnSanity?'ROI นี้เป็น Optimistic Scenario — Realistic จะต่ำกว่านี้':budgetPct>35?`งบสูงถึง ${budgetPct}% ของรายได้ — ควรลด Cost per Booking หรือเพิ่ม ADR`:totROI>=0?'คุ้มค่าตาม Booking ที่ตั้งไว้ ✓':'ยังไม่คุ้มทุน — ควรทบทวน Booking หรืองบประมาณ';
+      h+=`<div class="bsum ${bClass}" style="margin-top:12px">
         <div class="bsum-t">สรุปการลงทุน Marketing</div>
-        <div class="bsum-n">ROI ${totROI}%</div>
+        <div class="bsum-n">ROI ${totROI}%  <span style="font-size:16px;font-weight:400;margin-left:8px">| งบ ${budgetPct!==null?budgetPct+'%':''} ของรายได้</span></div>
         <div class="bsum-s">งบรวม ฿${fmt(totC)} → รายได้คาด ฿${fmt(totR)} — ${bMsg}</div>
       </div>`;
     }
