@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel IBE Health Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111827;--ink2:#374151;--muted:#6B7280;--line:#E5E7EB;--surf:#F9FAFB;--white:#FFFFFF;--blue:#2563EB;--blue-lt:#EFF6FF;--blue-md:#BFDBFE;--green:#16A34A;--green-lt:#F0FDF4;--green-md:#BBF7D0;--amber:#D97706;--amber-lt:#FFFBEB;--red:#DC2626;--red-lt:#FEF2F2;--red-md:#FECACA;--r4:4px;--r8:8px;--r12:12px;--r16:16px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--surf);color:var(--ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.shell{max-width:820px;margin:0 auto;padding:2rem 1.25rem 5rem}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.06em}
+.dots{display:flex;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .25s}
+.dot.done{background:var(--green)}.dot.active{background:var(--blue);transform:scale(1.3)}
+.hero{background:var(--ink);color:var(--white);border-radius:var(--r16);padding:2.5rem 2rem;margin-bottom:2rem;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;background:rgba(37,99,235,.18);pointer-events:none}
+.hero-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:.75rem;text-transform:uppercase}
+.hero h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:600;line-height:1.2;margin-bottom:.625rem}
+.hero h1 em{font-style:normal;color:#60A5FA}
+.hero p{font-size:14px;color:rgba(255,255,255,.55);max-width:480px}
+.wiz{display:flex;align-items:center;margin-bottom:2rem;background:var(--white);border:1px solid var(--line);border-radius:var(--r12);padding:.875rem 1.25rem;overflow-x:auto;gap:0}
+.ws{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ws-n{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:1.5px solid var(--line);color:var(--muted);transition:all .2s}
+.ws.active .ws-n{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.ws.done .ws-n{background:var(--green);color:var(--white);border-color:var(--green)}
+.ws-l{font-size:12px;color:var(--muted);white-space:nowrap}
+.ws.active .ws-l{color:var(--blue);font-weight:500}.ws.done .ws-l{color:var(--green)}
+.wsep{flex:1;height:1px;background:var(--line);margin:0 8px;min-width:16px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--r16);padding:1.5rem;margin-bottom:1.25rem}
+.ch{display:flex;align-items:flex-start;gap:12px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--line)}
+.chip{width:36px;height:36px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
+.cb{background:var(--blue-lt);color:var(--blue)}.cg{background:var(--green-lt);color:var(--green)}.ca{background:var(--amber-lt);color:var(--amber)}.cr{background:var(--red-lt);color:var(--red)}.ck{background:#F3F4F6;color:var(--ink)}
+.ct{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.3}.cs{font-size:12px;color:var(--muted);margin-top:2px}
+.fg{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.fi{display:flex;flex-direction:column;gap:5px}
+.fi label{font-size:12.5px;color:var(--ink2);font-weight:500}
+.fi input{height:38px;padding:0 11px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13.5px;border:1.5px solid var(--line);border-radius:var(--r8);background:var(--white);color:var(--ink);outline:none;transition:border-color .15s}
+.fi input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.fi input::placeholder{color:#D1D5DB}
+.pills{display:flex;gap:7px;flex-wrap:wrap}
+.pill{padding:6px 14px;font-size:13px;border:1.5px solid var(--line);border-radius:20px;cursor:pointer;color:var(--muted);background:var(--white);transition:all .15s;user-select:none;font-family:'IBM Plex Sans Thai',sans-serif}
+.pill:hover:not(.on){border-color:var(--blue-md);color:var(--blue);background:var(--blue-lt)}
+.pill.on{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.chgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:8px}
+.chitem{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--line);border-radius:var(--r8);cursor:pointer;transition:all .15s;user-select:none}
+.chitem.on{border-color:var(--blue);background:var(--blue-lt)}
+.chbox{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chitem.on .chbox{background:var(--blue);border-color:var(--blue)}
+.chck{display:none;color:white;font-size:11px;font-weight:700}.chitem.on .chck{display:block}
+.chlbl{font-size:13px;color:var(--ink2)}.chitem.on .chlbl{color:var(--blue);font-weight:500}
+.note{background:var(--surf);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:0 var(--r8) var(--r8) 0;padding:10px 14px;font-size:12.5px;color:var(--muted);line-height:1.8;margin:8px 0}
+.note strong{color:var(--ink2)}
+.dv{height:1px;background:var(--line);margin:1.25rem 0}
+.btnP{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14.5px;font-weight:600;border:none;border-radius:var(--r12);background:var(--ink);color:var(--white);cursor:pointer;transition:all .18s;margin-top:.5rem}
+.btnP:hover{background:#1F2937;transform:translateY(-1px)}
+.btnO{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;border:1.5px solid var(--line);border-radius:var(--r12);background:var(--white);color:var(--muted);cursor:pointer;transition:all .18s;margin-top:.75rem}
+.btnO:hover{border-color:var(--blue);color:var(--blue)}
+/* Result */
+.sbanner{background:var(--ink);border-radius:var(--r16);padding:2rem 1.5rem;color:var(--white);margin-bottom:1.25rem;position:relative;overflow:hidden}
+.sbanner::before{content:'';position:absolute;left:-40px;bottom:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.sgrid{display:grid;grid-template-columns:auto 1fr;gap:2rem;align-items:center;position:relative;z-index:1}
+.sbig{font-family:'IBM Plex Mono',monospace;font-size:80px;font-weight:400;line-height:1}
+.sleg{display:flex;flex-direction:column;gap:12px}
+.slrow{display:flex;align-items:center;gap:10px}
+.slbar{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;max-width:140px}
+.slfill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.sllbl{font-size:12px;color:rgba(255,255,255,.5);width:100px;flex-shrink:0}
+.slnum{font-family:'IBM Plex Mono',monospace;font-size:13px;min-width:36px}
+.spill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:14px;font-size:12.5px;font-weight:500;margin-left:8px}
+.sp-g{background:var(--green-lt);color:var(--green)}.sp-w{background:var(--amber-lt);color:var(--amber)}.sp-b{background:var(--red-lt);color:var(--red)}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.rrow:last-child{border-bottom:none}
+.rk{font-size:13px;color:var(--muted)}.rv{font-size:13.5px;font-weight:500}
+.rv-b{color:var(--red)}.rv-g{color:var(--green)}
+.mets{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.25rem}
+.met{background:var(--surf);border:1px solid var(--line);border-radius:var(--r8);padding:12px;text-align:center}
+.met-n{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500}.met-l{font-size:11px;color:var(--muted);margin-top:3px}
+.rtbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.rtbl th{padding:9px 12px;text-align:left;background:var(--surf);color:var(--muted);font-size:11.5px;font-weight:500;border-bottom:1px solid var(--line)}
+.rtbl th:not(:first-child){text-align:right}
+.rtbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.rtbl td:not(:first-child){text-align:right;font-weight:500;font-family:'IBM Plex Mono',monospace;font-size:12.5px}
+.rtbl .tfoot td{background:var(--surf);font-weight:600;border-top:2px solid var(--line)}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.apitem{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.apitem:last-child{border-bottom:none}
+.apbdg{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--white);flex-shrink:0;margin-top:2px}
+.bH{background:var(--red)}.bM{background:var(--amber)}.bL{background:var(--green)}
+.aptitle{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.apdesc{font-size:13px;color:var(--muted);line-height:1.6}
+.aptag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;margin-top:6px;margin-right:4px;font-weight:500}
+.ts{background:#EFF6FF;color:#1D4ED8}.tc{background:#FDF4FF;color:#7E22CE}.ta{background:#FFF7ED;color:#C2410C}
+.tse{background:#F0FDF4;color:#15803D}.ti{background:#ECFDF5;color:#065F46}.te{background:#FFFBEB;color:#92400E}
+.bsum{background:var(--green-lt);border:1px solid var(--green-md);border-radius:var(--r12);padding:1.25rem 1.5rem;margin-top:12px}
+.bsum-t{font-size:13px;font-weight:600;color:var(--green);margin-bottom:6px}
+.bsum-n{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:500;margin-bottom:2px}
+.bsum-s{font-size:12px;color:var(--green)}
+.tabs{display:none}.tabs.vis{display:flex;border-bottom:2px solid var(--line);margin-bottom:1.5rem}
+.tbtn{padding:10px 18px;font-size:13.5px;font-family:'IBM Plex Sans Thai',sans-serif;background:none;border:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .18s}
+.tbtn.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+.tpane{display:none}.tpane.on{display:block}
+@media(max-width:560px){
+  .shell{padding:1.25rem .875rem 3rem}.hero{padding:1.75rem 1.25rem 1.5rem}
+  .sgrid{grid-template-columns:1fr;gap:1rem}.sbig{font-size:56px}
+  .wiz{padding:.75rem 1rem}.ws-l{display:none}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="topbar">
+  <div class="logo">IBE · HEALTH CHECK</div>
+  <div class="dots" id="dotrow">
+    <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-tag">Hotel Direct Booking · Educational Tool</div>
+  <h1>ตรวจสุขภาพ<br><em>การจองตรง</em>ของโรงแรม</h1>
+  <p>วิเคราะห์เวบไซต์ IBE ต้นทุน OTA และความคุ้มค่าการลงทุนการตลาดรายช่องทาง พร้อม Action Plan</p>
+</div>
+
+<div class="wiz" id="wiz">
+  <div class="ws active" id="ws1"><div class="ws-n">1</div><div class="ws-l">เวบไซต์ & IBE</div></div>
+  <div class="wsep"></div>
+  <div class="ws" id="ws2"><div class="ws-n">2</div><div class="ws-l">รายได้ & OTA</div></div>
+  <div class="wsep"></div>
+  <div class="ws" id="ws3"><div class="ws-n">3</div><div class="ws-l">เลือก Channel</div></div>
+  <div class="wsep"></div>
+  <div class="ws" id="ws4"><div class="ws-n">4</div><div class="ws-l">Budget & ROI</div></div>
+  <div class="wsep"></div>
+  <div class="ws" id="ws5"><div class="ws-n">5</div><div class="ws-l">ผลลัพธ์</div></div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tbtn on" onclick="swT('input',this)">กรอกข้อมูล</button>
+  <button class="tbtn" onclick="swT('result',this)">ผลการวิเคราะห์</button>
+</div>
+
+<!-- INPUT -->
+<div class="tpane on" id="tab-input">
+
+<div class="card">
+  <div class="ch"><div class="chip cb">🌐</div><div><div class="ct">1. เวบไซต์และระบบ IBE</div><div class="cs">ความพร้อมของช่องทางจองตรง</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="fi"><label>โรงแรมมีเวบไซต์หรือไม่?</label>
+      <div class="pills" id="hasWeb"><div class="pill on" onclick="rp('hasWeb',this,'yes')">มีแล้ว</div><div class="pill" onclick="rp('hasWeb',this,'no')">ยังไม่มี</div></div></div>
+    <div id="wbd" style="display:flex;flex-direction:column;gap:16px">
+      <div class="fi"><label>การแสดงผลบน Mobile / Tablet</label>
+        <div class="pills" id="resp">
+          <div class="pill on" onclick="rp('resp',this,'good')">ดีมาก — ใช้ได้ทุกอุปกรณ์</div>
+          <div class="pill" onclick="rp('resp',this,'ok')">พอใช้ — บางส่วนผิดเพี้ยน</div>
+          <div class="pill" onclick="rp('resp',this,'bad')">มีปัญหา — Mobile ใช้ไม่ได้</div>
+        </div></div>
+      <div class="fi"><label>ความเร็วโหลดเวบไซต์</label>
+        <div class="pills" id="spd">
+          <div class="pill on" onclick="rp('spd',this,'fast')">เร็ว &lt;3 วินาที</div>
+          <div class="pill" onclick="rp('spd',this,'mid')">ปานกลาง 3-6 วินาที</div>
+          <div class="pill" onclick="rp('spd',this,'slow')">ช้า &gt;6 วินาที</div>
+        </div></div>
+      <div class="fi"><label>มีระบบ IBE (จองออนไลน์บนเวบ) หรือไม่?</label>
+        <div class="pills" id="hasIBE">
+          <div class="pill on" onclick="tIBE(this,'yes')">มีแล้ว</div>
+          <div class="pill" onclick="tIBE(this,'no')">ยังไม่มี</div>
+        </div></div>
+      <div id="ibed" style="display:flex;flex-direction:column;gap:16px">
+        <div class="fi"><label>IBE เชื่อมต่อ Google Hotel Ads อยู่หรือไม่?</label>
+          <div class="pills" id="gha">
+            <div class="pill on" onclick="rp('gha',this,'yes')">เชื่อมแล้ว</div>
+            <div class="pill" onclick="rp('gha',this,'no')">ยังไม่ได้เชื่อม</div>
+            <div class="pill" onclick="rp('gha',this,'dunno')">ไม่แน่ใจ</div>
+          </div></div>
+        <div class="fi"><label>ขั้นตอนการจองผ่าน IBE</label>
+          <div class="pills" id="ibep">
+            <div class="pill on" onclick="rp('ibep',this,'good')">ง่าย — น้อยกว่า 3 ขั้นตอน</div>
+            <div class="pill" onclick="rp('ibep',this,'ok')">ปานกลาง — 3-5 ขั้นตอน</div>
+            <div class="pill" onclick="rp('ibep',this,'bad')">ซับซ้อน / ช้า / สับสน</div>
+          </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><div class="chip cg">💰</div><div><div class="ct">2. รายได้และต้นทุน OTA</div><div class="cs">ข้อมูลพื้นฐานสำหรับคำนวณความคุ้มค่า</div></div></div>
+  <div class="fg">
+    <div class="fi"><label>จำนวนห้องทั้งหมด</label><input type="number" id="rooms" placeholder="เช่น 40" min="1"></div>
+    <div class="fi"><label>ราคาห้องเฉลี่ย ADR (บาท/คืน)</label><input type="number" id="adr" placeholder="เช่น 2800"></div>
+    <div class="fi"><label>อัตราเข้าพักเฉลี่ย OCC (%)</label><input type="number" id="occ" placeholder="เช่น 65" min="0" max="100"></div>
+    <div class="fi"><label>สัดส่วนจอง IBE ปัจจุบัน (%)</label><input type="number" id="ibeNow" placeholder="เช่น 15" min="0" max="100"></div>
+    <div class="fi"><label>สัดส่วนจองผ่าน OTA (%)</label><input type="number" id="otaSh" placeholder="เช่น 65" min="0" max="100"></div>
+    <div class="fi"><label>ค่าคอมมิชชั่น OTA เฉลี่ย (%)</label><input type="number" id="otaComm" placeholder="เช่น 18" min="0" max="40"></div>
+  </div>
+  <div class="note" style="margin-top:14px"><strong>หมายเหตุ:</strong> ข้อมูลนี้ใช้คำนวณต้นทุน OTA ต่อเดือน เพื่อเห็นภาพว่าการเพิ่มจอง IBE จะประหยัดได้เท่าไร</div>
+</div>
+
+<div class="card">
+  <div class="ch"><div class="chip ca">📡</div><div><div class="ct">3. เลือก Channel การตลาดที่สนใจ</div><div class="cs">เลือกได้มากกว่า 1 channel</div></div></div>
+  <div class="chgrid">
+    <div class="chitem on" id="ch-fb" onclick="tCh('fb')"><div class="chbox"><span class="chck">✓</span></div><div class="chlbl">Facebook & Instagram Ads</div></div>
+    <div class="chitem" id="ch-gg" onclick="tCh('gg')"><div class="chbox"><span class="chck">✓</span></div><div class="chlbl">Google Search Ads</div></div>
+    <div class="chitem" id="ch-gh" onclick="tCh('gh')"><div class="chbox"><span class="chck">✓</span></div><div class="chlbl">Google Hotel Ads</div></div>
+    <div class="chitem" id="ch-se" onclick="tCh('se')"><div class="chbox"><span class="chck">✓</span></div><div class="chlbl">SEO (Organic Search)</div></div>
+    <div class="chitem" id="ch-ct" onclick="tCh('ct')"><div class="chbox"><span class="chck">✓</span></div><div class="chlbl">Content / Social Media</div></div>
+    <div class="chitem" id="ch-em" onclick="tCh('em')"><div class="chbox"><span class="chck">✓</span></div><div class="chlbl">Email Marketing</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><div class="chip cr">📊</div><div><div class="ct">4. งบประมาณรายช่องทาง (ต่อเดือน)</div><div class="cs">กรอกเฉพาะ channel ที่เลือก</div></div></div>
+  <div id="buds" style="display:flex;flex-direction:column;gap:16px">
+
+    <div id="bud-fb">
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">📘 Facebook &amp; Instagram Ads</p>
+      <div class="fg">
+        <div class="fi"><label>งบค่าโฆษณา (บาท/เดือน)</label><input type="number" id="fb-sp" placeholder="เช่น 15000"></div>
+        <div class="fi"><label>ค่า Content / รูปภาพ (บาท)</label><input type="number" id="fb-ct" placeholder="เช่น 5000"></div>
+        <div class="fi"><label>ค่าจัดการ / เอเจนซี่ (บาท)</label><input type="number" id="fb-mg" placeholder="เช่น 3000"></div>
+        <div class="fi"><label>Booking ที่คาดจะได้/เดือน</label><input type="number" id="fb-bk" placeholder="เช่น 10"></div>
+      </div>
+    </div>
+
+    <div id="bud-gg" style="display:none">
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">🔍 Google Search Ads</p>
+      <div class="fg">
+        <div class="fi"><label>งบค่าโฆษณา (บาท/เดือน)</label><input type="number" id="gg-sp" placeholder="เช่น 10000"></div>
+        <div class="fi"><label>ค่าจัดการ / เอเจนซี่ (บาท)</label><input type="number" id="gg-mg" placeholder="เช่น 3000"></div>
+        <div class="fi"><label>Booking ที่คาดจะได้/เดือน</label><input type="number" id="gg-bk" placeholder="เช่น 8"></div>
+      </div>
+    </div>
+
+    <div id="bud-gh" style="display:none">
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">🏨 Google Hotel Ads</p>
+      <div class="fg">
+        <div class="fi"><label>งบ CPC/เดือน (บาท)</label><input type="number" id="gh-sp" placeholder="เช่น 8000"></div>
+        <div class="fi"><label>Booking ที่คาดจะได้/เดือน</label><input type="number" id="gh-bk" placeholder="เช่น 12"></div>
+      </div>
+      <div class="note" style="margin-top:8px">Google Hotel Ads แสดงราคาตรงใน Search — Conversion Rate สูงกว่า Display Ads</div>
+    </div>
+
+    <div id="bud-se" style="display:none">
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">🔎 SEO (Organic Search)</p>
+      <div class="fg">
+        <div class="fi"><label>ค่า SEO/เวบไซต์ (บาท/เดือน)</label><input type="number" id="se-sp" placeholder="เช่น 5000"></div>
+        <div class="fi"><label>Organic Booking คาดใน 6 เดือน</label><input type="number" id="se-bk" placeholder="เช่น 15"></div>
+      </div>
+      <div class="note" style="margin-top:8px">SEO ใช้เวลา 3-6 เดือนกว่าจะเห็นผล แต่ต้นทุนระยะยาวต่ำกว่า Paid Ads มาก</div>
+    </div>
+
+    <div id="bud-ct" style="display:none">
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">📸 Content / Social Media</p>
+      <div class="fg">
+        <div class="fi"><label>ค่า Content / ถ่ายภาพ (บาท/เดือน)</label><input type="number" id="ct-sp" placeholder="เช่น 8000"></div>
+        <div class="fi"><label>Booking คาดจากช่องนี้/เดือน</label><input type="number" id="ct-bk" placeholder="เช่น 5"></div>
+      </div>
+    </div>
+
+    <div id="bud-em" style="display:none">
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">✉️ Email Marketing</p>
+      <div class="fg">
+        <div class="fi"><label>ค่า Tool / ส่ง Email (บาท/เดือน)</label><input type="number" id="em-sp" placeholder="เช่น 1500"></div>
+        <div class="fi"><label>ขนาด Email List (คน)</label><input type="number" id="em-ls" placeholder="เช่น 500"></div>
+        <div class="fi"><label>Booking คาดจากช่องนี้/เดือน</label><input type="number" id="em-bk" placeholder="เช่น 4"></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="dv"></div>
+  <div class="fi">
+    <label>จำนวนคืนเฉลี่ยต่อการจอง (ทุก channel)</label>
+    <input type="number" id="avgN" placeholder="เช่น 2" min="1" style="max-width:200px">
+  </div>
+  <div class="note" style="margin-top:10px"><strong>วิธีคิด ROI:</strong> รายได้ = Booking × คืนเฉลี่ย × ADR &nbsp;|&nbsp; ROI = (รายได้ − ต้นทุน) ÷ ต้นทุน × 100</div>
+</div>
+
+<button class="btnP" onclick="analyze()">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  วิเคราะห์และดูผลลัพธ์
+</button>
+
+</div><!-- /input -->
+<div class="tpane" id="tab-result"></div>
+</div>
+
+<script>
+const S={hasWeb:'yes',resp:'good',spd:'fast',hasIBE:'yes',gha:'yes',ibep:'good'};
+const CH={fb:true,gg:false,gh:false,se:false,ct:false,em:false};
+
+function rp(g,el,v){document.querySelectorAll('#'+g+' .pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');S[g]=v;upd();}
+function tIBE(el,v){rp('hasIBE',el,v);const d=document.getElementById('ibed');d.style.display=v==='yes'?'flex':'none';if(v==='yes')d.style.gap='16px';}
+function tCh(id){CH[id]=!CH[id];document.getElementById('ch-'+id).classList.toggle('on',CH[id]);document.getElementById('bud-'+id).style.display=CH[id]?'block':'none';upd();}
+function swT(n,btn){document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.tpane').forEach(p=>p.classList.remove('on'));btn.classList.add('on');document.getElementById('tab-'+n).classList.add('on');}
+function gv(id){return parseFloat(document.getElementById(id)?.value)||0;}
+function fmt(n){return Math.round(n).toLocaleString('th-TH');}
+
+function upd(){
+  const ds=document.querySelectorAll('#dotrow .dot');
+  const s1=true,s2=gv('rooms')>0||gv('adr')>0,s3=Object.values(CH).some(Boolean);
+  const s4=['fb-sp','gg-sp','gh-sp','se-sp','ct-sp','em-sp'].some(id=>gv(id)>0);
+  const arr=[s1,s2,s3,s4,false];
+  let last=-1;
+  ds.forEach((d,i)=>{d.classList.remove('done','active');if(arr[i]){d.classList.add('done');last=i;}});
+  if(last+1<5)ds[last+1].classList.add('active');
+  ['ws1','ws2','ws3','ws4','ws5'].forEach((id,i)=>{
+    const el=document.getElementById(id);el.classList.remove('active','done');
+    if(i<=last)el.classList.add('done');else if(i===last+1)el.classList.add('active');
+  });
+}
+document.querySelectorAll('input').forEach(el=>el.addEventListener('input',upd));
+
+function sW(){
+  if(S.hasWeb==='no')return 0;
+  let s=10;
+  if(S.resp==='good')s+=20;else if(S.resp==='ok')s+=10;
+  if(S.spd==='fast')s+=20;else if(S.spd==='mid')s+=10;
+  if(S.hasIBE==='yes'){s+=20;if(S.gha==='yes')s+=15;else if(S.gha==='dunno')s+=5;if(S.ibep==='good')s+=15;else if(S.ibep==='ok')s+=8;}
+  return Math.min(s,100);
+}
+function sR(){
+  const occ=gv('occ'),ibe=gv('ibeNow'),ota=gv('otaSh');
+  if(!occ)return null;
+  let s=0;
+  if(occ>=70)s+=30;else if(occ>=50)s+=18;else s+=8;
+  if(ibe>=30)s+=35;else if(ibe>=15)s+=18;else s+=5;
+  if(ota<=40)s+=20;else if(ota<=60)s+=12;else s+=3;
+  if(gv('otaComm')>0)s+=12;
+  return Math.min(s,100);
+}
+function clr(s){return s>=70?'var(--green)':s>=40?'var(--amber)':'var(--red)';}
+function pill(s){if(s>=70)return'<span class="spill sp-g">✓ ดี</span>';if(s>=40)return'<span class="spill sp-w">⚠ ต้องปรับ</span>';return'<span class="spill sp-b">✗ อ่อนแอ</span>';}
+function bc(s){return s>=70?'#4ADE80':s>=40?'#FCD34D':'#F87171';}
+
+function calcCh(){
+  const adr=gv('adr'),ni=gv('avgN')||2;
+  const defs=[
+    {id:'fb',name:'Facebook & Instagram Ads',tag:'tc',cost:()=>gv('fb-sp')+gv('fb-ct')+gv('fb-mg'),book:()=>gv('fb-bk')},
+    {id:'gg',name:'Google Search Ads',tag:'ta',cost:()=>gv('gg-sp')+gv('gg-mg'),book:()=>gv('gg-bk')},
+    {id:'gh',name:'Google Hotel Ads',tag:'ti',cost:()=>gv('gh-sp'),book:()=>gv('gh-bk')},
+    {id:'se',name:'SEO (Organic)',tag:'tse',cost:()=>gv('se-sp'),book:()=>gv('se-bk')},
+    {id:'ct',name:'Content / Social',tag:'tc',cost:()=>gv('ct-sp'),book:()=>gv('ct-bk')},
+    {id:'em',name:'Email Marketing',tag:'te',cost:()=>gv('em-sp'),book:()=>gv('em-bk')},
+  ];
+  return defs.filter(d=>CH[d.id]).map(d=>{
+    const cost=d.cost(),book=d.book(),rev=book*ni*adr;
+    const roi=cost>0?Math.round((rev-cost)/cost*100):null;
+    return{...d,cost,book,rev:Math.round(rev),roi};
+  });
+}
+
+function buildAP(ws,rs,chs){
+  const P=[];
+  if(S.hasWeb==='no'){P.push({p:'H',t:'สร้างเวบไซต์โรงแรม',d:'โรงแรมที่ไม่มีเวบไซต์ไม่มีช่องทางรับจองตรงเลย — ต้องทำก่อนทุกอย่าง เวบไซต์ต้องรองรับ Mobile มีรูปห้อง ราคาชัดเจน และมี IBE พร้อมใช้งาน',tags:['ts','ti']});return P;}
+  if(S.spd==='slow')P.push({p:'H',t:'เร่งความเร็วเวบไซต์',d:'เวบโหลด>6 วิ ผู้เข้าชมออกก่อนเห็นราคา — บีบอัดรูปภาพ ใช้ CDN ตรวจ Core Web Vitals ใน Google Search Console',tags:['ts']});
+  else if(S.spd==='mid')P.push({p:'M',t:'ปรับปรุงความเร็วเวบไซต์',d:'โหลด 3-6 วิ ยังมีโอกาสปรับ — เปิด Lazy Loading บีบอัดรูป ลด HTTP Requests',tags:['ts']});
+  if(S.resp==='bad')P.push({p:'H',t:'แก้ปัญหา Responsive Design',d:'70%+ ของการค้นหาโรงแรมมาจาก Mobile — ทดสอบด้วย Google Mobile-Friendly Test และแก้ไขทันที',tags:['ts']});
+  if(S.hasIBE==='no')P.push({p:'H',t:'ติดตั้งระบบ IBE',d:'หากไม่มี IBE ผู้สนใจต้องโทรหรืออีเมลซึ่งเสียโอกาสมาก — เลือก IBE ที่รองรับ Google Hotel Ads มี SSL และจ่ายด้วยบัตรเครดิตได้',tags:['ti']});
+  else{
+    if(S.gha!=='yes')P.push({p:'H',t:'เชื่อมต่อ IBE กับ Google Hotel Ads',d:'Google Hotel Ads แสดงราคาตรงใน Google Search และ Maps ช่วยแข่งกับ OTA ได้บนหน้าแรก Google โดยจ่ายค่าคลิกเมื่อมี Booking จริง',tags:['ti','ta']});
+    if(S.ibep!=='good')P.push({p:'M',t:'ปรับปรุง UX ของ IBE',d:'IBE ขั้นตอนเยอะทำให้ผู้ใช้ละทิ้งกลางคัน — ลดเหลือ ≤3 ขั้นตอน เพิ่ม CTA ชัดเจน แสดง Trust Signal เช่น รีวิว ไอคอน Secure Payment',tags:['ti']});
+  }
+  if(rs!=null){
+    const ibe=gv('ibeNow'),ota=gv('otaSh');
+    if(ibe<20)P.push({p:'H',t:'เพิ่มสัดส่วนจองตรงผ่าน IBE',d:`IBE ปัจจุบัน ${ibe}% เป้าควรอยู่ที่ 30-40% — ใช้ Direct Booking Incentive เช่น ราคาพิเศษ อาหารเช้าฟรี หรือ Early Check-in สำหรับจองตรง`,tags:['ti']});
+    if(ota>60)P.push({p:'M',t:'ลดการพึ่งพา OTA',d:`OTA ${ota}% สูงมาก — เพิ่ม Rate Parity แต่ให้ Perks พิเศษกับจองตรง เช่น Free Upgrade หรือ Flexible Cancellation ที่ดีกว่า OTA`,tags:['ti','ta']});
+  }
+  const hasPaid=CH.fb||CH.gg||CH.gh;
+  if(!hasPaid&&S.hasIBE==='yes')P.push({p:'M',t:'ทดลอง Paid Ads เพื่อเพิ่มจองตรง',d:'โรงแรมที่มี IBE แต่ไม่ทำ Paid Ads เสียโอกาสเข้าถึงลูกค้าใหม่ — เริ่ม Facebook Ads หรือ Google Hotel Ads งบ 5,000-10,000 บาท/เดือน แล้วดูผล',tags:['ta','tc']});
+  if(CH.se)P.push({p:'L',t:'SEO ระยะยาว — คำค้นหาโรงแรม',d:'ทำ SEO คำเช่น "โรงแรม[เมือง]" "ที่พัก[ย่าน]" ควบคู่กับ Google Business Profile ที่สมบูรณ์ ตอบรีวิวสม่ำเสมอ เพื่อติด Local Pack',tags:['tse']});
+  if(CH.em)P.push({p:'L',t:'Email Marketing — ดึงลูกค้าเก่า',d:'ลูกค้าเคยพักคือกลุ่มที่มีโอกาสกลับมาสูง — ส่ง Early Bird Offer ล่วงหน้า 60-90 วัน ส่งโปรตามซีซั่น และขอ Review หลังเช็คเอาต์',tags:['te']});
+  chs.forEach(c=>{if(c.roi!==null&&c.roi<0)P.push({p:'M',t:`ทบทวนกลยุทธ์ ${c.name}`,d:`ROI ${c.roi}% ติดลบ — ตรวจ Target Audience ให้แม่นขึ้น ทำ A/B Test ภาพ/ข้อความ และปรับ Landing Page ก่อนเพิ่มงบ`,tags:['ta']});});
+  if(!P.length)P.push({p:'L',t:'รักษาคุณภาพและขยายช่องทาง',d:'ระบบโดยรวมดี — ขยาย Conversion Rate ด้วย Trust Signal รีวิว และ Offer พิเศษสำหรับจองตรง',tags:['ti']});
+  const ord={H:0,M:1,L:2};P.sort((a,b)=>ord[a.p]-ord[b.p]);
+  return P;
+}
+
+function analyze(){
+  const ws=sW(),rs=sR();
+  const ov=rs!=null?Math.round(ws*.5+rs*.5):ws;
+  const adr=gv('adr'),ni=gv('avgN')||2;
+  const chs=calcCh();
+  const totC=chs.reduce((a,c)=>a+c.cost,0),totB=chs.reduce((a,c)=>a+c.book,0);
+  const totR=Math.round(totB*ni*adr);
+  const totROI=totC>0?Math.round((totR-totC)/totC*100):null;
+  const plans=buildAP(ws,rs,chs);
+  const revpar=adr&&gv('occ')?Math.round(adr*(gv('occ')/100)):null;
+  const r=gv('rooms'),occ=gv('occ'),otaSh=gv('otaSh'),otaComm=gv('otaComm');
+  const totRev30=r&&occ&&adr?Math.round(r*(occ/100)*30*adr):null;
+  const otaCmo=totRev30&&otaSh&&otaComm?Math.round(totRev30*(otaSh/100)*(otaComm/100)):null;
+  const bLbl={H:'สำคัญมาก',M:'ควรทำ',L:'เพิ่มเติม'};
+  const bCls={H:'bH',M:'bM',L:'bL'};
+  const tagNames={ts:'WEBSITE',tc:'SOCIAL',ta:'ADS',tse:'SEO',ti:'IBE',te:'EMAIL'};
+  const tagCls={ts:'ts',tc:'tc',ta:'ta',tse:'tse',ti:'ti',te:'te'};
+
+  let h='';
+
+  h+=`<div class="sbanner"><div class="sgrid">
+    <div>
+      <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:4px;font-family:'IBM Plex Mono',monospace;letter-spacing:.06em">OVERALL SCORE</p>
+      <div class="sbig" style="color:${clr(ov)}">${ov}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.4)">/100 ${pill(ov)}</div>
+    </div>
+    <div class="sleg">
+      <div class="slrow"><span class="sllbl">เวบไซต์ & IBE</span><div class="slbar"><div class="slfill" style="width:${ws}%;background:${bc(ws)}"></div></div><span class="slnum" style="color:${bc(ws)}">${ws}</span></div>
+      ${rs!=null?`<div class="slrow"><span class="sllbl">รายได้ & OTA</span><div class="slbar"><div class="slfill" style="width:${rs}%;background:${bc(rs)}"></div></div><span class="slnum" style="color:${bc(rs)}">${rs}</span></div>`:''}
+      ${chs.length?`<div class="slrow"><span class="sllbl">ROI รวม</span><div class="slbar"><div class="slfill" style="width:${totROI!=null?Math.min(Math.max(totROI,0),200)/2:0}%;background:${totROI>=0?'#4ADE80':'#F87171'}"></div></div><span class="slnum" style="color:${totROI>=0?'#4ADE80':'#F87171'}">${totROI!=null?totROI+'%':'—'}</span></div>`:''}
+    </div>
+  </div></div>`;
+
+  if(occ&&adr){
+    h+=`<div class="card"><div class="ch"><div class="chip cg">📈</div><div><div class="ct">ภาพรวมรายได้และต้นทุน OTA</div></div></div>
+    <div class="mets">
+      <div class="met"><div class="met-n">${occ.toFixed?occ:gv('occ')}%</div><div class="met-l">OCC</div></div>
+      <div class="met"><div class="met-n">฿${fmt(adr)}</div><div class="met-l">ADR</div></div>
+      ${revpar?`<div class="met"><div class="met-n">฿${fmt(revpar)}</div><div class="met-l">RevPAR</div></div>`:''}
+      ${gv('ibeNow')?`<div class="met"><div class="met-n">${gv('ibeNow')}%</div><div class="met-l">IBE ปัจจุบัน</div></div>`:''}
+    </div>`;
+    if(otaCmo){
+      h+=`<div class="note"><strong>วิธีคิด:</strong><br>
+        รายได้รวม/เดือน = ${r} ห้อง × ${gv('occ')}% × 30 วัน × ฿${fmt(adr)} = ฿${fmt(totRev30)}<br>
+        ค่าคอมมิชชั่น OTA = ฿${fmt(totRev30)} × ${otaSh}% × ${otaComm}% = <strong>฿${fmt(otaCmo)}/เดือน</strong>
+      </div>
+      <div class="rrow"><span class="rk">รายได้รวม/เดือน (ประมาณ)</span><span class="rv">฿${fmt(totRev30)}</span></div>
+      <div class="rrow"><span class="rk">ค่าคอมมิชชั่น OTA ที่จ่ายออก/เดือน</span><span class="rv rv-b">฿${fmt(otaCmo)}</span></div>
+      <div class="rrow"><span class="rk">ค่าคอมมิชชั่น OTA ต่อปี (ประมาณ)</span><span class="rv rv-b">฿${fmt(otaCmo*12)}</span></div>`;
+    }
+    h+=`</div>`;
+  }
+
+  if(chs.length){
+    h+=`<div class="card"><div class="ch"><div class="chip ca">📊</div><div><div class="ct">ผลตอบแทนรายช่องทาง (ต่อเดือน)</div><div class="cs">รายได้ = Booking × ${ni} คืน × ฿${fmt(adr)}</div></div></div>
+    <div style="overflow-x:auto"><table class="rtbl"><thead><tr>
+      <th>Channel</th><th>งบรวม (฿)</th><th>Booking</th><th>รายได้คาด (฿)</th><th>ROI</th>
+    </tr></thead><tbody>`;
+    chs.forEach(c=>{
+      h+=`<tr><td><strong>${c.name}</strong></td><td>${fmt(c.cost)}</td><td>${c.book}</td><td>${fmt(c.rev)}</td><td class="${c.roi===null?'':(c.roi>=0?'pos':'neg')}">${c.roi!==null?c.roi+'%':'—'}</td></tr>`;
+    });
+    h+=`<tr class="tfoot"><td>รวมทุก channel</td><td>${fmt(totC)}</td><td>${totB}</td><td>${fmt(totR)}</td><td class="${totROI>=0?'pos':'neg'}">${totROI!==null?totROI+'%':'—'}</td></tr>
+    </tbody></table></div>`;
+    if(totROI!==null){
+      h+=`<div class="note" style="margin-top:10px"><strong>วิธีคิด:</strong><br>
+        รายได้รวม = ${totB} Booking × ${ni} คืน × ฿${fmt(adr)} = ฿${fmt(totR)}<br>
+        ROI = (฿${fmt(totR)} − ฿${fmt(totC)}) ÷ ฿${fmt(totC)} × 100 = <strong>${totROI}%</strong>
+      </div>`;
+      h+=`<div class="bsum">
+        <div class="bsum-t">สรุปการลงทุน Marketing ต่อเดือน</div>
+        <div class="bsum-n" style="color:${totROI>=0?'#14532D':'#7F1D1D'}">ROI ${totROI}%</div>
+        <div class="bsum-s">งบรวม ฿${fmt(totC)} → รายได้คาด ฿${fmt(totR)} — ${totROI>=0?'คุ้มค่า ✓':'ยังไม่คุ้ม ควรทบทวน'}</div>
+      </div>`;
+    }
+    h+=`</div>`;
+
+    if(totC>0&&adr>0){
+      const be=Math.ceil(totC/(ni*adr));
+      h+=`<div class="card"><div class="ch"><div class="chip cb">⚖️</div><div><div class="ct">จุด Break-even</div><div class="cs">ต้องได้ Booking เท่าไรถึงคุ้มทุน</div></div></div>
+      <div class="rrow"><span class="rk">งบการตลาดรวม/เดือน</span><span class="rv">฿${fmt(totC)}</span></div>
+      <div class="rrow"><span class="rk">รายได้ต่อ 1 Booking (${ni} คืน × ฿${fmt(adr)})</span><span class="rv">฿${fmt(ni*adr)}</span></div>
+      <div class="rrow" style="border-bottom:none"><span class="rk">Booking ขั้นต่ำเพื่อคุ้มทุน</span><span class="rv" style="font-size:20px;color:var(--blue)">${be} Booking</span></div>
+      <div class="note" style="margin-top:10px">หากได้ <strong>${be} Booking/เดือน</strong> จาก IBE ถือว่าคุ้มค่าแล้ว Booking หลังจากนี้คือกำไรล้วนๆ</div>
+      </div>`;
+    }
+  }
+
+  h+=`<div class="card"><div class="ch"><div class="chip ck">🗺️</div><div><div class="ct">Action Plan — สิ่งที่ควรทำต่อ</div><div class="cs">${plans.length} ข้อ เรียงตามความสำคัญ</div></div></div>`;
+  plans.forEach((p,i)=>{
+    h+=`<div class="apitem">
+      <div class="apbdg ${bCls[p.p]}">${i+1}</div>
+      <div>
+        <div class="aptitle">${p.t} <span style="font-size:11px;font-weight:400;color:var(--muted)">[${bLbl[p.p]}]</span></div>
+        <div class="apdesc">${p.d}</div>
+        <div>${(p.tags||[]).map(t=>`<span class="aptag ${tagCls[t]||t}">${tagNames[t]||t}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  h+=`<button class="btnO" onclick="swT('input',document.querySelectorAll('.tbtn')[0])">← แก้ไขข้อมูลและวิเคราะห์ใหม่</button>`;
+
+  document.getElementById('tab-result').innerHTML=h;
+  document.getElementById('tabs').classList.add('vis');
+  document.getElementById('wiz').style.display='none';
+  document.querySelectorAll('#dotrow .dot').forEach(d=>{d.classList.remove('active');d.classList.add('done');});
+  swT('result',document.querySelectorAll('.tbtn')[1]);
+  setTimeout(()=>{document.querySelectorAll('.slfill').forEach(el=>{const w=el.style.width;el.style.width='0';setTimeout(()=>el.style.width=w,60);});},80);
+}
+</script>
+</body>
+</html>
