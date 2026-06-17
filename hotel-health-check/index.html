@@ -273,24 +273,27 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--surf);color:va
     </div>
   </div>
 
-  <!-- Benchmark reference (collapsible) -->
-  <div style="margin-bottom:14px">
+    <div style="margin-bottom:14px">
     <button onclick="toggleBench()" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--blue);font-family:'IBM Plex Sans Thai',sans-serif;padding:0;display:flex;align-items:center;gap:5px">
-      <span id="benchIcon">▶</span> ดู Benchmark อุตสาหกรรมโรงแรม (Cost per Booking จริง)
+      <span id="benchIcon">▶</span> วิธีคิด Benchmark Cost per Booking (ผูกกับ ADR ของโรงแรม)
     </button>
     <div id="benchBox" style="display:none;margin-top:8px">
-      <table class="bench-table">
-        <thead><tr><th>Channel</th><th>Cost per Booking (ต่ำ)</th><th>Cost per Booking (กลาง)</th><th>Cost per Booking (สูง)</th></tr></thead>
-        <tbody>
-          <tr><td>Facebook & Instagram Ads</td><td>฿800</td><td>฿1,500</td><td>฿3,000</td></tr>
-          <tr><td>Google Search Ads</td><td>฿600</td><td>฿1,200</td><td>฿2,500</td></tr>
-          <tr><td>Google Hotel Ads</td><td>฿300</td><td>฿700</td><td>฿1,500</td></tr>
-          <tr><td>SEO (ต้นทุน/เดือน ÷ Booking คาดใน 6 เดือน)</td><td>฿200</td><td>฿500</td><td>฿1,200</td></tr>
-          <tr><td>Content / Social Media</td><td>฿500</td><td>฿1,000</td><td>฿2,000</td></tr>
-          <tr><td>Email Marketing</td><td>฿100</td><td>฿300</td><td>฿600</td></tr>
-        </tbody>
-      </table>
-      <div class="note" style="margin-top:6px">ข้อมูล benchmark สำหรับโรงแรมในไทย ADR ฿1,500-5,000 — ยิ่ง ADR สูง Cost per Booking ที่ยอมรับได้ก็สูงขึ้นตามสัดส่วน</div>
+      <div class="note">
+        <strong>Benchmark คำนวณจาก ADR ที่กรอกในข้อ 2</strong> ไม่ใช่ตัวเลข fixed — เพราะโรงแรม ADR ฿800 กับ ฿5,000 ยอมรับ Cost per Booking ต่างกันมาก<br><br>
+        <strong>สูตร:</strong> Max Cost per Booking = ADR × จำนวนคืน × %<br>
+        &nbsp;&nbsp;• Pessimistic (แย่สุดที่ยังรับได้) = ADR × คืน × <strong>20%</strong><br>
+        &nbsp;&nbsp;• Realistic (ค่าเฉลี่ยอุตสาหกรรม) = ADR × คืน × <strong>12%</strong><br>
+        &nbsp;&nbsp;• Optimistic (Campaign ดีมาก) &nbsp;&nbsp;&nbsp;&nbsp;= ADR × คืน × <strong>6%</strong><br><br>
+        <strong>ตัวอย่าง:</strong> ADR ฿2,000 × 2 คืน = รายได้ ฿4,000/booking<br>
+        &nbsp;&nbsp;• Pessimistic CPB = ฿4,000 × 20% = <strong>฿800</strong><br>
+        &nbsp;&nbsp;• Realistic CPB &nbsp;= ฿4,000 × 12% = <strong>฿480</strong><br>
+        &nbsp;&nbsp;• Optimistic CPB = ฿4,000 × 6% &nbsp;= <strong>฿240</strong><br><br>
+        <strong>ที่มาของ %:</strong> CPC จริงในตลาดโรงแรมไทย ÷ Conversion Rate ต่อ Channel<br>
+        &nbsp;&nbsp;• Facebook Ads: CPC ฿8-30, CVR 0.8-2.5% &nbsp;&nbsp;→ CPB ≈ รายได้ × 5-15%<br>
+        &nbsp;&nbsp;• Google Search: CPC ฿10-40, CVR 1.5-4% &nbsp;→ CPB ≈ รายได้ × 4-12%<br>
+        &nbsp;&nbsp;• Google Hotel : CPC ฿15-50, CVR 4-10% &nbsp;&nbsp;→ CPB ≈ รายได้ × 3-8% (High-intent)<br>
+        &nbsp;&nbsp;• Email &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ต้นทุนต่ำ, CVR 1-3% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ CPB ต่ำที่สุดใน channel
+      </div>
     </div>
   </div>
 
@@ -450,18 +453,37 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--surf);color:va
 const S={hasWeb:'yes',resp:'good',spd:'fast',hasIBE:'yes',gha:'yes',ibep:'good'};
 const CH={fb:true,gg:false,gh:false,se:false,ct:false,em:false};
 
-// ── Benchmark: [pessimistic CPB, realistic CPB, optimistic CPB]
-const BENCH={
-  fb:[3000,1500,800],
-  gg:[2500,1200,600],
-  gh:[1500,700,300],
-  se:[1200,500,200],
-  ct:[2000,1000,500],
-  em:[600,300,100]
-};
-// Thresholds: if user CPB < X% of benchmark optimistic → warn/bad
-const CPB_BAD_MULT=0.4;   // < 40% of optimistic → unrealistic (bad)
-const CPB_WARN_MULT=0.75; // < 75% of optimistic → a bit low (warn)
+// ── Benchmark คำนวณจาก ADR จริงของโรงแรม ──────────────────────────────
+//
+// แนวคิด: Max Cost per Booking ที่ยอมรับได้ = ADR × คืน × % threshold
+//   - Pessimistic CPB = ADR × ni × 20%  (จ่ายแพง ยังพอรับได้)
+//   - Realistic  CPB = ADR × ni × 12%  (industry average)
+//   - Optimistic CPB = ADR × ni × 6%   (Campaign Optimize ดีมาก)
+//
+// CPC Benchmark (ตลาดโรงแรมไทย) และ Conversion Rate ที่ใช้คำนวณ:
+//   Facebook Ads : CPC ฿8-30,  CVR 0.8-2.5%  → CPB = CPC ÷ CVR
+//   Google Search: CPC ฿10-40, CVR 1.5-4%
+//   Google Hotel : CPC ฿15-50, CVR 4-10%   (High-intent)
+//   SEO          : ต้นทุน/เดือน ÷ Booking ใน 6 เดือน
+//   Content      : CPC ฿5-20,  CVR 0.5-1.5%
+//   Email        : ต้นทุน/คน ฿0.5-3, CVR 1-3%
+//
+// CPB floor per channel (กันไม่ให้ Optimistic เป็น 0):
+const CPB_FLOOR={fb:200,gg:150,gh:80,se:100,ct:150,em:50};
+// % ของ (ADR × ni) ที่ใช้คำนวณ CPB แต่ละ scenario
+const CPB_PCT={pess:0.20,real:0.12,opt:0.06};
+
+function getBench(id,adr,ni){
+  const rev1=adr*(ni||2);  // รายได้ต่อ 1 booking
+  const pess=Math.max(rev1*CPB_PCT.pess, CPB_FLOOR[id]*2);
+  const real=Math.max(rev1*CPB_PCT.real, CPB_FLOOR[id]*1.2);
+  const opt =Math.max(rev1*CPB_PCT.opt,  CPB_FLOOR[id]);
+  return[Math.round(pess),Math.round(real),Math.round(opt)];
+}
+
+// Thresholds: CPB ที่กรอก vs Optimistic Benchmark
+const CPB_BAD_MULT=0.35;  // < 35% of opt → unrealistic
+const CPB_WARN_MULT=0.70; // < 70% of opt → optimistic/check
 
 function gv(id){return parseFloat(document.getElementById(id)?.value)||0;}
 function fmt(n){return Math.round(n).toLocaleString('th-TH');}
@@ -493,7 +515,8 @@ function liveCheck(id){
   const okEl=document.getElementById('alert-'+id+'-ok');
   const scEl=document.getElementById('sc-'+id);
   const badgeEl=document.getElementById('cpb-badge-'+id);
-  const [bPess,bReal,bOpt]=BENCH[id];
+  const adr=gv('adr'), ni=gv('avgN')||2;
+  const [bPess,bReal,bOpt]=getBench(id,adr,ni);
 
   // hide all first
   [badEl,warnEl,okEl].forEach(e=>{e.classList.remove('show');});
@@ -504,40 +527,49 @@ function liveCheck(id){
   if(!cost||!book){upd();return;}
 
   const cpb=cost/book;
-  const scPess=Math.floor(cost/bPess),scReal=Math.floor(cost/bReal),scOpt=Math.floor(cost/bOpt);
+  const scPess=Math.max(1,Math.floor(cost/bPess));
+  const scReal=Math.max(1,Math.floor(cost/bReal));
+  const scOpt =Math.max(1,Math.floor(cost/bOpt));
   const isSEO=id==='se';
+  const adrNote=adr?`(คำนวณจาก ADR ฿${fmt(adr)} × ${ni} คืน)`:'(กรอก ADR ในข้อ 2 เพื่อให้ Benchmark แม่นยำ)';
 
-  // Show live CPB
-  liveEl.innerHTML=`<span style="font-size:12px;color:var(--muted)">Cost per Booking ที่คุณตั้ง:</span> <strong style="font-family:'IBM Plex Mono',monospace;font-size:13px">฿${fmt(cpb)}</strong> <span style="font-size:11px;color:var(--muted)">(Benchmark: ฿${fmt(bOpt)}–฿${fmt(bPess)})</span>`;
+  // Show live CPB + how benchmark was derived
+  liveEl.innerHTML=`
+    <span style="font-size:12px;color:var(--muted)">Cost per Booking ที่คุณตั้ง:</span>
+    <strong style="font-family:'IBM Plex Mono',monospace;font-size:13px;margin:0 4px">฿${fmt(cpb)}</strong>
+    <span style="font-size:11px;color:var(--muted)">| Benchmark ${adrNote}: Opt ฿${fmt(bOpt)} · Real ฿${fmt(bReal)} · Pess ฿${fmt(bPess)}</span>`;
   liveEl.classList.add('show');
   badgeEl.style.display='inline-block';
 
   if(cpb<bOpt*CPB_BAD_MULT){
-    // Unrealistic
-    badEl.innerHTML=`<span class="alert-icon">🚨</span><strong>Booking ที่คาดไว้สูงเกินจริง</strong><br>Cost per Booking ของคุณอยู่ที่ ฿${fmt(cpb)} ซึ่งต่ำกว่า Benchmark ที่ดีที่สุดในอุตสาหกรรม (฿${fmt(bOpt)}) ถึง ${Math.round((1-cpb/bOpt)*100)}% — ในทางปฏิบัติแทบเป็นไปไม่ได้ที่งบนี้จะได้ Booking มากขนาดนั้น`;
+    badEl.innerHTML=`<span class="alert-icon">🚨</span><strong>Booking ที่คาดไว้สูงเกินจริง</strong><br>
+      Cost per Booking ของคุณ ฿${fmt(cpb)} ต่ำกว่า Benchmark Optimistic (฿${fmt(bOpt)}) ถึง ${Math.round((1-cpb/bOpt)*100)}%<br>
+      Benchmark คำนวณจาก ADR ฿${fmt(adr)} × ${ni} คืน × 6% = ฿${fmt(bOpt)} — ในทางปฏิบัติแทบเป็นไปไม่ได้ที่งบนี้จะได้ Booking มากขนาดนั้น<br>
+      <strong>แนะนำ: ใช้ตัวเลข Realistic (${scReal} booking) แทน</strong>`;
     badEl.classList.add('show');
-    badgeEl.textContent='⚠ ไม่สมเหตุสมผล';badgeEl.style.background='var(--red-lt)';badgeEl.style.color='var(--red)';badgeEl.style.border='1px solid var(--red-md)';
+    badgeEl.textContent='🚨 ไม่สมเหตุสมผล';badgeEl.style.background='var(--red-lt)';badgeEl.style.color='var(--red)';badgeEl.style.border='1px solid var(--red-md)';
     document.getElementById('sc-'+id+'-p').textContent=scPess+' booking';
     document.getElementById('sc-'+id+'-r').textContent=scReal+' booking';
     document.getElementById('sc-'+id+'-o').textContent=scOpt+' booking';
     scEl.style.display='grid';
   } else if(cpb<bOpt*CPB_WARN_MULT){
-    // Optimistic but borderline
-    warnEl.innerHTML=`<span class="alert-icon">⚠️</span><strong>Booking ค่อนข้างสูง — ควรตรวจสอบ</strong><br>Cost per Booking ฿${fmt(cpb)} ใกล้เคียง Optimistic Scenario แต่ยังต่ำกว่า Benchmark ทั่วไป ถ้า Campaign Setup ดีมากอาจเป็นไปได้ แต่ควรวางแผนสำหรับกรณี Realistic ด้วย`;
+    warnEl.innerHTML=`<span class="alert-icon">⚠️</span><strong>Booking ค่อนข้างสูง — ใกล้เคียง Optimistic Scenario</strong><br>
+      Cost per Booking ฿${fmt(cpb)} ต่ำกว่า Benchmark Optimistic (฿${fmt(bOpt)}) อยู่พอควร<br>
+      เป็นไปได้ถ้า Campaign Setup ดีมากและ Landing Page Optimize แล้ว แต่ควรวางแผนสำรองที่ Realistic (${scReal} booking) ด้วย`;
     warnEl.classList.add('show');
-    badgeEl.textContent='⚠ ค่อนข้างสูง';badgeEl.style.background='var(--amber-lt)';badgeEl.style.color='var(--amber)';badgeEl.style.border='1px solid var(--amber-md)';
+    badgeEl.textContent='⚠ Optimistic';badgeEl.style.background='var(--amber-lt)';badgeEl.style.color='var(--amber)';badgeEl.style.border='1px solid var(--amber-md)';
     document.getElementById('sc-'+id+'-p').textContent=scPess+' booking';
     document.getElementById('sc-'+id+'-r').textContent=scReal+' booking';
     document.getElementById('sc-'+id+'-o').textContent=scOpt+' booking';
     scEl.style.display='grid';
   } else if(cpb<=bPess){
-    // Reasonable
-    okEl.innerHTML=`<span class="alert-icon">✅</span><strong>Booking ที่คาดไว้สมเหตุสมผล</strong><br>Cost per Booking ฿${fmt(cpb)} อยู่ใน Benchmark อุตสาหกรรม (฿${fmt(bOpt)}–฿${fmt(bPess)})`;
+    okEl.innerHTML=`<span class="alert-icon">✅</span><strong>Booking ที่คาดไว้สมเหตุสมผล</strong><br>
+      Cost per Booking ฿${fmt(cpb)} อยู่ใน Benchmark (฿${fmt(bOpt)}–฿${fmt(bPess)}) ซึ่งคำนวณจาก ADR × คืน × 6-20%`;
     okEl.classList.add('show');
     badgeEl.textContent='✓ สมเหตุสมผล';badgeEl.style.background='var(--green-lt)';badgeEl.style.color='var(--green)';badgeEl.style.border='1px solid var(--green-md)';
   } else {
-    // Conservative (high CPB) — still reasonable
-    okEl.innerHTML=`<span class="alert-icon">ℹ️</span><strong>Booking Conservative — ปลอดภัย</strong><br>Cost per Booking ฿${fmt(cpb)} สูงกว่า Benchmark แต่ยังเป็นไปได้ หากต้องการ ROI ที่ดีขึ้น ควร Optimize Campaign ก่อนเพิ่มงบ`;
+    okEl.innerHTML=`<span class="alert-icon">ℹ️</span><strong>Booking Conservative — ปลอดภัย</strong><br>
+      Cost per Booking ฿${fmt(cpb)} สูงกว่า Pessimistic Benchmark (฿${fmt(bPess)}) — ตั้งเป้าไว้ Conservative ดี แต่หาก Optimize Campaign ได้ดีควรได้มากกว่านี้ (Realistic: ${scReal} booking)`;
     okEl.classList.add('show');
     badgeEl.textContent='✓ Conservative';badgeEl.style.background='var(--blue-lt)';badgeEl.style.color='var(--blue)';badgeEl.style.border='1px solid var(--blue-md)';
   }
@@ -598,7 +630,7 @@ function calcChs(){
     const cost=d.costFn(),book=d.bookFn(),rev=book*ni*adr;
     const roi=cost>0?Math.round((rev-cost)/cost*100):null;
     const cpb=book>0?cost/book:null;
-    const [bPess,bReal,bOpt]=BENCH[d.id];
+    const [bPess,bReal,bOpt]=getBench(d.id,adr,ni);
     let sanity='ok',sanityLabel='✓ สมเหตุสมผล';
     if(cpb!==null){
       if(cpb<bOpt*CPB_BAD_MULT){sanity='bad';sanityLabel='🚨 ไม่สมเหตุสมผล';}
