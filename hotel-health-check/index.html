@@ -931,11 +931,14 @@ function analyze(){
     </tr></tbody></table></div>`;
 
     if(totROI!==null){
-      const budgetPct=totR>0?Math.round(totC/totR*100):null;
+      const budgetPctRaw=totR>0?(totC/totR*100):null;
+      // ใช้ toFixed(2) เพื่อแสดงทศนิยม 2 ตำแหน่ง กันกรณีที่ % น้อยมาก เช่น 0.09%
+      const budgetPct=budgetPctRaw!==null?(budgetPctRaw<1?budgetPctRaw.toFixed(2):budgetPctRaw<10?budgetPctRaw.toFixed(1):Math.round(budgetPctRaw)):null;
+      const budgetPctNum=budgetPctRaw; // ใช้ตัวเลข raw สำหรับเปรียบเทียบ threshold
       // Industry benchmark: Marketing spend as % of revenue
       // Good: <15%, Acceptable: 15-25%, High: 25-35%, Too high: >35%
-      const budgetPctLabel=budgetPct===null?'':budgetPct<=15?'✓ ดีมาก (ต่ำกว่า 15%)':budgetPct<=25?'✓ อยู่ในเกณฑ์ (15-25%)':budgetPct<=35?'⚠ ค่อนข้างสูง (25-35%)':'🚨 สูงมาก (>35%)';
-      const budgetPctColor=budgetPct===null?'':budgetPct<=15?'var(--green)':budgetPct<=25?'var(--ink)':budgetPct<=35?'var(--amber)':'var(--red)';
+      const budgetPctLabel=budgetPctNum===null?'':budgetPctNum<=15?'✓ ดีมาก (ต่ำกว่า 15%)':budgetPctNum<=25?'✓ อยู่ในเกณฑ์ (15-25%)':budgetPctNum<=35?'⚠ ค่อนข้างสูง (25-35%)':'🚨 สูงมาก (>35%)';
+      const budgetPctColor=budgetPctNum===null?'':budgetPctNum<=15?'var(--green)':budgetPctNum<=25?'var(--ink)':budgetPctNum<=35?'var(--amber)':'var(--red)';
 
       h+=`<div class="note" style="margin-top:10px"><strong>วิธีคิด:</strong><br>
         รายได้รวม = ${totB} Booking × ${ni} คืน × ฿${fmt(adr)} = ฿${fmt(totR)}<br>
@@ -958,8 +961,8 @@ function analyze(){
         <div class="rrow"><span class="rk">งบการตลาด คิดเป็น % ของรายได้คาด</span><span class="rv" style="color:${budgetPctColor};font-size:16px;font-weight:600">${budgetPct}% <span style="font-size:12px;font-weight:400">${budgetPctLabel}</span></span></div>`;
       }
 
-      const bClass=hasBadSanity?'bsum-bad':hasWarnSanity?'bsum-warn':totROI>=0&&budgetPct<=25?'bsum-good':totROI>=0?'bsum-warn':'bsum-bad';
-      const bMsg=hasBadSanity?'⚠ ROI นี้อาจสูงเกินจริง เนื่องจาก Booking บาง Channel ไม่สมเหตุสมผล':hasWarnSanity?'ROI นี้เป็น Optimistic Scenario — Realistic จะต่ำกว่านี้':budgetPct>35?`งบสูงถึง ${budgetPct}% ของรายได้ — ควรลด Cost per Booking หรือเพิ่ม ADR`:totROI>=0?'คุ้มค่าตาม Booking ที่ตั้งไว้ ✓':'ยังไม่คุ้มทุน — ควรทบทวน Booking หรืองบประมาณ';
+      const bClass=hasBadSanity?'bsum-bad':hasWarnSanity?'bsum-warn':totROI>=0&&budgetPctNum<=25?'bsum-good':totROI>=0?'bsum-warn':'bsum-bad';
+      const bMsg=hasBadSanity?'⚠ ROI นี้อาจสูงเกินจริง เนื่องจาก Booking บาง Channel ไม่สมเหตุสมผล':hasWarnSanity?'ROI นี้เป็น Optimistic Scenario — Realistic จะต่ำกว่านี้':budgetPctNum>35?`งบสูงถึง ${budgetPct}% ของรายได้ — ควรลด Cost per Booking หรือเพิ่ม ADR`:totROI>=0?'คุ้มค่าตาม Booking ที่ตั้งไว้ ✓':'ยังไม่คุ้มทุน — ควรทบทวน Booking หรืองบประมาณ';
       h+=`<div class="bsum ${bClass}" style="margin-top:12px">
         <div class="bsum-t">สรุปการลงทุน Marketing</div>
         <div class="bsum-n">ROI ${totROI}%  <span style="font-size:16px;font-weight:400;margin-left:8px">| งบ ${budgetPct!==null?budgetPct+'%':''} ของรายได้</span></div>
