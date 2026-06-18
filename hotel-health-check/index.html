@@ -458,9 +458,9 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--surf);color:va
 
     <!-- icon + heading -->
     <div style="text-align:center;margin-bottom:1.5rem">
-      <div style="width:52px;height:52px;background:#EFF6FF;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto .875rem">📋</div>
-      <h2 style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:18px;font-weight:600;color:#111827;margin-bottom:6px">รับผลวิเคราะห์ฉบับเต็ม</h2>
-      <p style="font-size:13.5px;color:#6B7280;line-height:1.6">กรอกข้อมูลด้านล่างเพื่อดูผลวิเคราะห์สุขภาพ IBE พร้อม Action Plan ของโรงแรมคุณ</p>
+      <div style="width:52px;height:52px;background:#EFF6FF;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto .875rem">📊</div>
+      <h2 style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:18px;font-weight:600;color:#111827;margin-bottom:6px">เกือบเสร็จแล้ว!</h2>
+      <p style="font-size:13.5px;color:#6B7280;line-height:1.6">กรอกข้อมูลด้านล่าง แล้วกด <strong style="color:#111827">ดูผลวิเคราะห์</strong> — ผลจะแสดงบนหน้าจอทันที</p>
     </div>
 
     <!-- form -->
@@ -506,19 +506,19 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--surf);color:va
 
       <button type="submit" id="leadSubmitBtn"
         style="margin-top:4px;padding:13px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14.5px;font-weight:600;border:none;border-radius:12px;background:#111827;color:#fff;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px">
-        <span id="leadBtnText">ดูผลวิเคราะห์ของฉัน →</span>
+        <span id="leadBtnText">ดูผลวิเคราะห์บนหน้าจอ →</span>
       </button>
 
       <p style="font-size:11.5px;color:#9CA3AF;text-align:center;margin-top:2px">
-        ข้อมูลของคุณจะถูกเก็บรักษาเป็นความลับ ไม่มีการแชร์ให้บุคคลที่สาม
+        ผลวิเคราะห์จะแสดงบนหน้าจอทันที · ข้อมูลของคุณจะถูกเก็บรักษาเป็นความลับ
       </p>
     </form>
 
     <!-- success state (hidden) -->
     <div id="leadSuccess" style="display:none;text-align:center;padding:1rem 0">
       <div style="font-size:40px;margin-bottom:12px">✅</div>
-      <h3 style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:16px;font-weight:600;color:#111827;margin-bottom:6px">รับข้อมูลเรียบร้อยแล้ว!</h3>
-      <p style="font-size:13.5px;color:#6B7280">กำลังแสดงผลวิเคราะห์...</p>
+      <h3 style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:16px;font-weight:600;color:#111827;margin-bottom:6px">บันทึกข้อมูลเรียบร้อยแล้ว!</h3>
+      <p style="font-size:13.5px;color:#6B7280">กำลังแสดงผลวิเคราะห์บนหน้าจอ...</p>
     </div>
 
   </div>
@@ -584,7 +584,7 @@ async function submitLead(e){
         document.getElementById('leadForm').style.display='flex';
         document.getElementById('leadSuccess').style.display='none';
         btn.disabled=false;
-        btnTxt.textContent='ดูผลวิเคราะห์ของฉัน →';
+        btnTxt.textContent='ดูผลวิเคราะห์บนหน้าจอ →';
         document.getElementById('leadForm').reset();
         analyze();
       },1400);
@@ -594,7 +594,7 @@ async function submitLead(e){
   }catch(err){
     // fallback — still let them see results
     btn.disabled=false;
-    btnTxt.textContent='ดูผลวิเคราะห์ของฉัน →';
+    btnTxt.textContent='ดูผลวิเคราะห์บนหน้าจอ →';
     closeLead();
     analyze();
   }
