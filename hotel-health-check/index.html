@@ -440,7 +440,7 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--surf);color:va
   </div>
 </div>
 
-<button class="btnP" onclick="analyze()">
+<button class="btnP" onclick="openLead()">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
   วิเคราะห์และดูผลลัพธ์
 </button>
@@ -449,9 +449,157 @@ body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--surf);color:va
 <div class="tpane" id="tab-result"></div>
 </div><!-- /shell -->
 
+<!-- ── Lead Capture Modal ── -->
+<div id="leadOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:#fff;border-radius:20px;padding:2rem 1.75rem;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.2);position:relative">
+
+    <!-- close -->
+    <button onclick="closeLead()" style="position:absolute;top:14px;right:16px;background:none;border:none;cursor:pointer;font-size:20px;color:#9CA3AF;line-height:1">✕</button>
+
+    <!-- icon + heading -->
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="width:52px;height:52px;background:#EFF6FF;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto .875rem">📋</div>
+      <h2 style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:18px;font-weight:600;color:#111827;margin-bottom:6px">รับผลวิเคราะห์ฉบับเต็ม</h2>
+      <p style="font-size:13.5px;color:#6B7280;line-height:1.6">กรอกข้อมูลด้านล่างเพื่อดูผลวิเคราะห์สุขภาพ IBE พร้อม Action Plan ของโรงแรมคุณ</p>
+    </div>
+
+    <!-- form -->
+    <form id="leadForm" onsubmit="submitLead(event)" style="display:flex;flex-direction:column;gap:12px">
+      <input type="hidden" name="_subject" value="Hotel IBE Health Check — Lead ใหม่">
+      <input type="hidden" name="_next" value="">
+
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <label style="font-size:12.5px;font-weight:500;color:#374151">ชื่อ – นามสกุล <span style="color:#DC2626">*</span></label>
+        <input type="text" name="name" id="ld-name" required placeholder="เช่น คุณสมชาย ใจดี"
+          style="height:40px;padding:0 12px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;border:1.5px solid #E5E7EB;border-radius:10px;outline:none;transition:border-color .15s"
+          onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'">
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <label style="font-size:12.5px;font-weight:500;color:#374151">ชื่อโรงแรม <span style="color:#DC2626">*</span></label>
+        <input type="text" name="hotel" id="ld-hotel" required placeholder="เช่น The Garden Hotel Chiangmai"
+          style="height:40px;padding:0 12px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;border:1.5px solid #E5E7EB;border-radius:10px;outline:none;transition:border-color .15s"
+          onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <label style="font-size:12.5px;font-weight:500;color:#374151">อีเมล <span style="color:#DC2626">*</span></label>
+          <input type="email" name="email" id="ld-email" required placeholder="email@hotel.com"
+            style="height:40px;padding:0 12px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13.5px;border:1.5px solid #E5E7EB;border-radius:10px;outline:none;transition:border-color .15s"
+            onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <label style="font-size:12.5px;font-weight:500;color:#374151">เบอร์โทรศัพท์</label>
+          <input type="tel" name="phone" id="ld-phone" placeholder="0812345678"
+            style="height:40px;padding:0 12px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13.5px;border:1.5px solid #E5E7EB;border-radius:10px;outline:none;transition:border-color .15s"
+            onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'">
+        </div>
+      </div>
+
+      <!-- hidden fields — snapshot of key inputs -->
+      <input type="hidden" name="adr" id="hd-adr">
+      <input type="hidden" name="occ" id="hd-occ">
+      <input type="hidden" name="ibe_now" id="hd-ibe">
+      <input type="hidden" name="ota_share" id="hd-ota">
+      <input type="hidden" name="channels" id="hd-ch">
+
+      <button type="submit" id="leadSubmitBtn"
+        style="margin-top:4px;padding:13px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14.5px;font-weight:600;border:none;border-radius:12px;background:#111827;color:#fff;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px">
+        <span id="leadBtnText">ดูผลวิเคราะห์ของฉัน →</span>
+      </button>
+
+      <p style="font-size:11.5px;color:#9CA3AF;text-align:center;margin-top:2px">
+        ข้อมูลของคุณจะถูกเก็บรักษาเป็นความลับ ไม่มีการแชร์ให้บุคคลที่สาม
+      </p>
+    </form>
+
+    <!-- success state (hidden) -->
+    <div id="leadSuccess" style="display:none;text-align:center;padding:1rem 0">
+      <div style="font-size:40px;margin-bottom:12px">✅</div>
+      <h3 style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:16px;font-weight:600;color:#111827;margin-bottom:6px">รับข้อมูลเรียบร้อยแล้ว!</h3>
+      <p style="font-size:13.5px;color:#6B7280">กำลังแสดงผลวิเคราะห์...</p>
+    </div>
+
+  </div>
+</div>
+
 <script>
 const S={hasWeb:'yes',resp:'good',spd:'fast',hasIBE:'yes',gha:'yes',ibep:'good'};
 const CH={fb:true,gg:false,gh:false,se:false,ct:false,em:false};
+
+// ── Lead Modal ────────────────────────────────────────────────
+function openLead(){
+  // pre-fill hidden snapshot fields
+  document.getElementById('hd-adr').value=gv('adr')||'';
+  document.getElementById('hd-occ').value=gv('occ')||'';
+  document.getElementById('hd-ibe').value=gv('ibeNow')||'';
+  document.getElementById('hd-ota').value=gv('otaSh')||'';
+  const activeCh=Object.entries(CH).filter(([k,v])=>v).map(([k])=>k).join(', ');
+  document.getElementById('hd-ch').value=activeCh||'ไม่ได้เลือก';
+  const ol=document.getElementById('leadOverlay');
+  ol.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeLead(){
+  document.getElementById('leadOverlay').style.display='none';
+  document.body.style.overflow='';
+}
+// close on backdrop click
+document.getElementById('leadOverlay').addEventListener('click',function(e){
+  if(e.target===this)closeLead();
+});
+
+async function submitLead(e){
+  e.preventDefault();
+  const btn=document.getElementById('leadSubmitBtn');
+  const btnTxt=document.getElementById('leadBtnText');
+  btn.disabled=true;
+  btnTxt.textContent='กำลังส่ง...';
+
+  const data={
+    name: document.getElementById('ld-name').value,
+    hotel: document.getElementById('ld-hotel').value,
+    email: document.getElementById('ld-email').value,
+    phone: document.getElementById('ld-phone').value,
+    adr: document.getElementById('hd-adr').value,
+    occ: document.getElementById('hd-occ').value,
+    ibe_now: document.getElementById('hd-ibe').value,
+    ota_share: document.getElementById('hd-ota').value,
+    channels: document.getElementById('hd-ch').value,
+    _subject: `Hotel IBE Lead — ${document.getElementById('ld-hotel').value}`
+  };
+
+  try{
+    const res=await fetch('https://formspree.io/f/xwvjjgjr',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(data)
+    });
+    if(res.ok){
+      document.getElementById('leadForm').style.display='none';
+      document.getElementById('leadSuccess').style.display='block';
+      setTimeout(()=>{
+        closeLead();
+        document.getElementById('leadForm').style.display='flex';
+        document.getElementById('leadSuccess').style.display='none';
+        btn.disabled=false;
+        btnTxt.textContent='ดูผลวิเคราะห์ของฉัน →';
+        document.getElementById('leadForm').reset();
+        analyze();
+      },1400);
+    } else {
+      throw new Error('submit failed');
+    }
+  }catch(err){
+    // fallback — still let them see results
+    btn.disabled=false;
+    btnTxt.textContent='ดูผลวิเคราะห์ของฉัน →';
+    closeLead();
+    analyze();
+  }
+}
+// ── End Lead Modal ────────────────────────────────────────────
 
 // ── Benchmark คำนวณจาก ADR จริงของโรงแรม ──────────────────────────────
 //
