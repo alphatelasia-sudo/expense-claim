@@ -37,15 +37,13 @@
   .sig-status { font-size:12px; color:var(--ink-light); }
   .sig-not-found { font-size:12px; color:var(--accent); }
 
-  /* Receipts */
-  .receipt-upload { border:2px dashed var(--line); border-radius:2px; padding:16px; text-align:center; cursor:pointer; background:#fafaf7; transition:all 0.12s; margin-bottom:8px; }
-  .receipt-upload:hover { border-color:var(--ink); background:#f5f0e8; }
+  /* Receipts (read-only display) */
   .receipt-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
   .receipt-item { position:relative; width:80px; height:80px; border:1px solid var(--line); border-radius:2px; overflow:hidden; background:#f5f0e8; }
   .receipt-item img { width:100%; height:100%; object-fit:cover; }
-  .receipt-item .remove { position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .receipt-item .pdf-icon { display:flex; align-items:center; justify-content:center; height:100%; font-size:28px; }
-  .upload-progress { font-size:12px; color:var(--ink-light); margin-top:4px; }
+  .receipt-item a { display:block; width:100%; height:100%; }
+  .receipt-item .pdf-icon { display:flex; align-items:center; justify-content:center; height:100%; font-size:28px; text-decoration:none; color:inherit; }
+  .receipt-empty { font-size:12px; color:var(--ink-light); }
 
   .btn-row { display:flex; gap:12px; margin-top:20px; }
   .btn { flex:1; padding:13px; border-radius:2px; font-size:14px; font-weight:700; font-family:'Sarabun',sans-serif; cursor:pointer; border:none; outline:none; transition:all 0.12s; }
@@ -92,15 +90,9 @@
 
       <div class="divider"></div>
 
-      <!-- Receipts Upload -->
-      <div class="section-label">แนบใบเสร็จ / หลักฐาน (สูงสุด 5 ไฟล์)</div>
-      <div class="receipt-upload" onclick="document.getElementById('receiptInput').click()">
-        📎 คลิกเพื่อเพิ่มรูปใบเสร็จ (JPG, PNG, PDF)
-        <div style="font-size:11px;color:#4a4a6a;margin-top:4px">เลือกได้หลายไฟล์พร้อมกัน</div>
-      </div>
-      <input type="file" id="receiptInput" accept="image/*,.pdf" multiple style="display:none" onchange="addReceipts(this)">
+      <!-- Receipts (read-only, uploaded by requester) -->
+      <div class="section-label">ใบเสร็จ / หลักฐานแนบ</div>
       <div class="receipt-list" id="receiptList"></div>
-      <div class="upload-progress" id="uploadProgress"></div>
 
       <div class="divider"></div>
 
@@ -139,14 +131,17 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykkaDZf50RRLyuB6WAbkzZwz01gM-ViWuQ_wFjHJ2_wwcQH2NE-V9TaZ6xwYZLynzl/exec';
 let claimData = null;
 let signatureData = '';
-let receiptFiles = [];
-let uploadedReceipts = [];
 
+// ── Apps Script Request (POST — supports large payloads like signatures) ──
 function appsScriptRequest(params) {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error('timeout')), 30000);
-    const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-    fetch(url, { redirect: 'follow' })
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(params),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      redirect: 'follow'
+    })
       .then(r => r.text())
       .then(text => { clearTimeout(timeout); try { resolve(JSON.parse(text)); } catch(e) { reject(new Error('parse error')); } })
       .catch(err => { clearTimeout(timeout); reject(err); });
@@ -182,6 +177,34 @@ function renderClaim(data) {
   });
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
+  loadReceipts(data.docNo);
+}
+
+// ── Receipts (read-only — files were attached by the requester on the claim form) ──
+async function loadReceipts(docNo) {
+  const list = document.getElementById('receiptList');
+  list.innerHTML = '<span class="receipt-empty">กำลังโหลด...</span>';
+  try {
+    const res = await appsScriptRequest({ action: 'getReceipts', docNo: docNo });
+    list.innerHTML = '';
+    if (res.success && res.urls && res.urls.length) {
+      res.urls.forEach(receipt => {
+        const item = document.createElement('div');
+        item.className = 'receipt-item';
+        const isPdf = (receipt.name || '').toLowerCase().endsWith('.pdf');
+        if (isPdf) {
+          item.innerHTML = '<a href="' + receipt.url + '" target="_blank" class="pdf-icon">📄</a>';
+        } else {
+          item.innerHTML = '<a href="' + receipt.url + '" target="_blank"><img src="' + receipt.url + '"></a>';
+        }
+        list.appendChild(item);
+      });
+    } else {
+      list.innerHTML = '<span class="receipt-empty">ไม่มีไฟล์แนบ</span>';
+    }
+  } catch(err) {
+    list.innerHTML = '<span class="receipt-empty" style="color:var(--accent)">โหลดไฟล์แนบไม่สำเร็จ</span>';
+  }
 }
 
 async function loadSignature() {
@@ -203,58 +226,6 @@ async function loadSignature() {
   }
 }
 
-function addReceipts(input) {
-  const files = Array.from(input.files);
-  const remaining = 5 - receiptFiles.length;
-  if (remaining <= 0) { alert('แนบได้สูงสุด 5 ไฟล์ครับ'); return; }
-  const toAdd = files.slice(0, remaining);
-  if (files.length > remaining) alert('เพิ่มได้อีก ' + remaining + ' ไฟล์เท่านั้น');
-  toAdd.forEach(file => {
-    receiptFiles.push(file);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const item = document.createElement('div');
-      item.className = 'receipt-item';
-      item.id = 'receipt_' + receiptFiles.length;
-      if (file.type === 'application/pdf') {
-        item.innerHTML = '<div class="pdf-icon">📄</div><button class="remove" onclick="removeReceipt(this,' + (receiptFiles.length-1) + ')">×</button>';
-      } else {
-        item.innerHTML = '<img src="' + e.target.result + '"><button class="remove" onclick="removeReceipt(this,' + (receiptFiles.length-1) + ')">×</button>';
-      }
-      document.getElementById('receiptList').appendChild(item);
-    };
-    reader.readAsDataURL(file);
-  });
-  input.value = '';
-}
-
-function removeReceipt(btn, idx) {
-  receiptFiles.splice(idx, 1);
-  btn.parentElement.remove();
-}
-
-async function uploadAllReceipts(docNo) {
-  if (receiptFiles.length === 0) return [];
-  const progress = document.getElementById('uploadProgress');
-  const urls = [];
-  for (let i = 0; i < receiptFiles.length; i++) {
-    const file = receiptFiles[i];
-    progress.textContent = 'กำลังอัปโหลดใบเสร็จ ' + (i+1) + '/' + receiptFiles.length + '...';
-    const base64 = await new Promise((res) => {
-      const reader = new FileReader();
-      reader.onload = (e) => res(e.target.result);
-      reader.readAsDataURL(file);
-    });
-    const result = await appsScriptRequest({
-      action: 'uploadReceipt',
-      data: JSON.stringify({ docNo: docNo, fileName: file.name, imageData: base64, mimeType: file.type })
-    });
-    if (result.success) urls.push(result.url);
-  }
-  progress.textContent = 'อัปโหลดใบเสร็จครบแล้ว ✓';
-  return urls;
-}
-
 async function submitDecision(decision) {
   const approverName = document.getElementById('approverName').value.trim();
   if (!approverName) { alert('กรุณากรอกชื่อผู้อนุมัติครับ'); return; }
@@ -263,9 +234,6 @@ async function submitDecision(decision) {
   btns.forEach(b => b.disabled = true);
 
   try {
-    // อัปโหลดใบเสร็จก่อน
-    await uploadAllReceipts(claimData.docNo);
-
     const payload = {
       docNo: claimData.docNo,
       decision,
