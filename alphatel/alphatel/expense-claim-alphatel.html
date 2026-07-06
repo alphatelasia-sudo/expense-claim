@@ -37,7 +37,6 @@
     padding: 32px 16px;
   }
 
-  /* ── Top Bar ────────────────────────── */
   .top-bar {
     display: flex;
     align-items: center;
@@ -80,7 +79,6 @@
     text-transform: uppercase;
   }
 
-  /* ── Card ────────────────────────────── */
   .card {
     background: var(--paper);
     border: 1px solid var(--line);
@@ -127,7 +125,6 @@
 
   .card-body { padding: 28px; }
 
-  /* ── Section label ───────────────────── */
   .section-label {
     font-size: 9px;
     letter-spacing: 2px;
@@ -146,13 +143,11 @@
     background: var(--line);
   }
 
-  /* ── Grid layout ─────────────────────── */
   .row { display: grid; gap: 16px; margin-bottom: 16px; }
   .row-2 { grid-template-columns: 1fr 1fr; }
   .row-3 { grid-template-columns: 1fr 1fr 1fr; }
   .row-4 { grid-template-columns: 2fr 1fr 1fr 1fr; }
 
-  /* ── Form Fields ─────────────────────── */
   .field { display: flex; flex-direction: column; gap: 5px; }
   .field label {
     font-size: 10px;
@@ -178,7 +173,6 @@
   }
   .field select { cursor: pointer; }
 
-  /* ── Objective Radio ─────────────────── */
   .objective-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -221,14 +215,12 @@
   }
   .obj-option.selected .obj-check::after { opacity: 1; }
 
-  /* ── Divider ─────────────────────────── */
   .divider {
     height: 1px;
     background: var(--line);
     margin: 24px 0;
   }
 
-  /* ── Items Table ─────────────────────── */
   .items-table { width: 100%; border-collapse: collapse; }
   .items-table thead tr {
     background: var(--cream);
@@ -301,7 +293,6 @@
     padding-right: 10px;
   }
 
-  /* ── Signature Section ───────────────── */
   .sig-row {
     display: grid;
     grid-template-columns: 1fr 1px 1fr 1px 1fr;
@@ -352,7 +343,6 @@
   }
   .sig-date-input:focus { border-bottom-color: var(--ink); }
 
-  /* ── Action Bar ──────────────────────── */
   .action-bar {
     display: flex;
     gap: 12px;
@@ -394,7 +384,6 @@
   .btn-submit:hover { background: #145530; }
   .btn svg { vertical-align: -3px; margin-right: 6px; }
 
-  /* ── Status Banner ───────────────────── */
   .status-banner {
     display: none;
     align-items: center;
@@ -418,14 +407,21 @@
     border: 1px solid #ffe082;
   }
 
-  /* ══════════════════════════════════════
-     PRINT STYLES
-  ══════════════════════════════════════ */
+  /* Receipts */
+  .receipt-upload { border:2px dashed var(--line); border-radius:2px; padding:16px; text-align:center; cursor:pointer; background:#fafaf7; transition:all 0.12s; margin-bottom:8px; }
+  .receipt-upload:hover { border-color:var(--ink); background:#f5f0e8; }
+  .receipt-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .receipt-item { position:relative; width:80px; height:80px; border:1px solid var(--line); border-radius:2px; overflow:hidden; background:#f5f0e8; }
+  .receipt-item img { width:100%; height:100%; object-fit:cover; }
+  .receipt-item .remove { position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .receipt-item .pdf-icon { display:flex; align-items:center; justify-content:center; height:100%; font-size:28px; text-decoration:none; }
+  .upload-progress { font-size:12px; color:var(--ink-light); margin-top:4px; }
+
   @media print {
     @page { margin: 15mm 15mm 15mm 15mm; size: A4; }
     body { background: white !important; padding: 0; }
     .app-shell { padding: 0; max-width: 100%; }
-    .top-bar, .action-bar, .status-banner { display: none !important; }
+    .top-bar, .action-bar, .status-banner, .receipt-upload { display: none !important; }
     .card { box-shadow: none !important; border: 1px solid #ccc; }
     .card-body { padding: 20px; }
 
@@ -441,7 +437,6 @@
     }
   }
 
-  /* ── Responsive ──────────────────────── */
   @media (max-width: 640px) {
     .row-2, .row-3, .row-4 { grid-template-columns: 1fr; }
     .objective-grid { grid-template-columns: 1fr 1fr; }
@@ -456,7 +451,6 @@
 
 <div class="app-shell">
 
-  <!-- Top Bar -->
   <div class="top-bar">
     <div class="brand">
       <div class="brand-logo">AA</div>
@@ -470,13 +464,11 @@
     </div>
   </div>
 
-  <!-- Status Banner -->
   <div class="status-banner" id="statusBanner">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
     <span id="statusText">บันทึกสำเร็จ</span>
   </div>
 
-  <!-- Main Card -->
   <div class="card">
     <div class="card-header">
       <div>
@@ -491,7 +483,6 @@
 
     <div class="card-body">
 
-      <!-- Section 1: Request Info -->
       <div class="section-label">ข้อมูลผู้ขอเบิก / Requester Info</div>
 
       <div class="row row-4">
@@ -535,7 +526,6 @@
 
       <div class="divider"></div>
 
-      <!-- Section 2: Objective -->
       <div class="section-label">วัตถุประสงค์ / Objective</div>
 
       <div class="objective-grid" id="objectiveGrid" style="margin-bottom:14px;">
@@ -595,7 +585,6 @@
 
       <div class="divider"></div>
 
-      <!-- Section 3: Items -->
       <div class="section-label">รายการค่าใช้จ่าย / Expense Items</div>
 
       <table class="items-table">
@@ -608,7 +597,6 @@
           </tr>
         </thead>
         <tbody id="itemsBody">
-          <!-- generated by JS -->
         </tbody>
         <tfoot>
           <tr>
@@ -621,7 +609,17 @@
 
       <div class="divider"></div>
 
-      <!-- Section 4: Signatures -->
+      <div class="section-label">แนบใบเสร็จ / หลักฐาน (สูงสุด 5 ไฟล์)</div>
+      <div class="receipt-upload" onclick="document.getElementById('receiptInput').click()">
+        📎 คลิกเพื่อเพิ่มรูปใบเสร็จ (JPG, PNG, PDF)
+        <div style="font-size:11px;color:#4a4a6a;margin-top:4px">เลือกได้หลายไฟล์พร้อมกัน</div>
+      </div>
+      <input type="file" id="receiptInput" accept="image/*,.pdf" multiple style="display:none" onchange="addReceipts(this)">
+      <div class="receipt-list" id="receiptList"></div>
+      <div class="upload-progress" id="uploadProgress"></div>
+
+      <div class="divider"></div>
+
       <div class="section-label">ลายมือชื่อ / Signatures</div>
 
       <div class="sig-row">
@@ -653,7 +651,6 @@
         </div>
       </div>
 
-      <!-- Action Bar -->
       <div class="action-bar">
         <button class="btn btn-ghost" onclick="clearForm()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.56"/></svg>
@@ -673,22 +670,28 @@
         </button>
       </div>
 
-    </div><!-- /card-body -->
-  </div><!-- /card -->
+    </div>
+  </div>
 
-</div><!-- /app-shell -->
+</div>
 
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykkaDZf50RRLyuB6WAbkzZwz01gM-ViWuQ_wFjHJ2_wwcQH2NE-V9TaZ6xwYZLynzl/exec';
 const PRINT_BASE_URL = 'https://alphatelasia-sudo.github.io/expense-claim/alphatel/alphatel/print.html';
 const NUM_ITEMS = 9;
 let selectedObjective = '';
+let receiptFiles = [];
 
+// ── Apps Script Request (POST — supports large payloads like signatures/receipts) ──
 function appsScriptRequest(params) {
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('timeout')), 15000);
-    const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-    fetch(url, { redirect: 'follow' })
+    const timeout = setTimeout(() => reject(new Error('timeout')), 30000);
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(params),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      redirect: 'follow'
+    })
       .then(r => r.text())
       .then(text => {
         clearTimeout(timeout);
@@ -807,6 +810,59 @@ function validateForm(data) {
   return true;
 }
 
+// ── Receipt attachments ─────────────────────────────────────────
+function addReceipts(input) {
+  const files = Array.from(input.files);
+  const remaining = 5 - receiptFiles.length;
+  if (remaining <= 0) { alert('แนบได้สูงสุด 5 ไฟล์ครับ'); return; }
+  const toAdd = files.slice(0, remaining);
+  if (files.length > remaining) alert('เพิ่มได้อีก ' + remaining + ' ไฟล์เท่านั้น');
+  toAdd.forEach(file => {
+    receiptFiles.push(file);
+    const idx = receiptFiles.length - 1;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const item = document.createElement('div');
+      item.className = 'receipt-item';
+      if (file.type === 'application/pdf') {
+        item.innerHTML = '<div class="pdf-icon">📄</div><button class="remove" onclick="removeReceipt(this,' + idx + ')">×</button>';
+      } else {
+        item.innerHTML = '<img src="' + e.target.result + '"><button class="remove" onclick="removeReceipt(this,' + idx + ')">×</button>';
+      }
+      document.getElementById('receiptList').appendChild(item);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function removeReceipt(btn, idx) {
+  receiptFiles.splice(idx, 1);
+  btn.parentElement.remove();
+}
+
+async function uploadAllReceipts(docNo) {
+  if (receiptFiles.length === 0) return [];
+  const progress = document.getElementById('uploadProgress');
+  const urls = [];
+  for (let i = 0; i < receiptFiles.length; i++) {
+    const file = receiptFiles[i];
+    progress.textContent = 'กำลังอัปโหลดใบเสร็จ ' + (i+1) + '/' + receiptFiles.length + '...';
+    const base64 = await new Promise((res) => {
+      const reader = new FileReader();
+      reader.onload = (e) => res(e.target.result);
+      reader.readAsDataURL(file);
+    });
+    const result = await appsScriptRequest({
+      action: 'uploadReceipt',
+      data: JSON.stringify({ docNo: docNo, fileName: file.name, imageData: base64, mimeType: file.type })
+    });
+    if (result.success) urls.push(result.url);
+  }
+  progress.textContent = 'อัปโหลดใบเสร็จครบแล้ว ✓';
+  return urls;
+}
+
 async function submitForApproval() {
   const data = collectData();
   if (!validateForm(data)) return;
@@ -821,6 +877,12 @@ async function submitForApproval() {
     data.docNo = await getDocNo();
     const saveRes = await appsScriptRequest({ action: 'saveClaim', data: JSON.stringify(data) });
     if (!saveRes.success) throw new Error(saveRes.error || 'บันทึกไม่สำเร็จ');
+
+    if (receiptFiles.length > 0) {
+      showBanner('⏳ กำลังอัปโหลดใบเสร็จ...', 'success');
+      await uploadAllReceipts(data.docNo);
+    }
+
     const notifyRes = await appsScriptRequest({ action: 'notifyLark', data: JSON.stringify(data) });
     if (!notifyRes.success) throw new Error(notifyRes.error || 'ส่ง Lark ไม่สำเร็จ');
     showBanner('✓ ส่งขออนุมัติ ' + data.docNo + ' ไปที่หัวหน้าแล้ว', 'success');
@@ -862,6 +924,9 @@ function clearForm() {
   });
   document.querySelectorAll('.obj-option').forEach(o => o.classList.remove('selected'));
   selectedObjective = '';
+  receiptFiles = [];
+  document.getElementById('receiptList').innerHTML = '';
+  document.getElementById('uploadProgress').textContent = '';
   document.getElementById('tripRow').style.display = 'none';
   document.getElementById('docNo').value = 'DRAFT';
   document.getElementById('displayDocNo').textContent = 'DRAFT';
@@ -872,6 +937,7 @@ function clearForm() {
 
 async function printForm() {
   const data = collectData();
+  if (!validateForm(data)) return;
   if (data.docNo === 'DRAFT') {
     showBanner('⚠ กรุณายื่นขออนุมัติก่อนปริ้น', 'warn');
     return;
