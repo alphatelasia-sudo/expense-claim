@@ -3,161 +3,152 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comfy Rooms – Expense Approval</title>
+<title>Comfy Rooms Hospitality – อนุมัติใบขอเบิก</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #1a1a2e; --ink-light: #4a4a6a;
-    --paper: #fafaf7; --line: #d8d4cc;
-    --accent: #c8421a; --success: #1a6b3c; --warn: #7a5c00;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Sarabun', sans-serif; background: #e8e4dc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  :root { --ink:#1a1a2e; --ink-light:#4a4a6a; --paper:#fafaf7; --line:#d8d4cc; --accent:#c8421a; --success:#1a6b3c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Sarabun',sans-serif; background:#e8e4dc; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .card { background:var(--paper); border:1px solid var(--line); border-radius:4px; max-width:580px; width:100%; box-shadow:0 4px 24px rgba(0,0,0,0.1); overflow:hidden; }
+  .card-header { background:var(--ink); color:white; padding:20px 28px; }
+  .card-header-sub { font-size:11px; letter-spacing:2px; text-transform:uppercase; opacity:0.7; }
+  .card-header-title { font-size:20px; font-weight:700; margin-top:2px; }
+  .card-body { padding:28px; }
+  .section-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-light); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--line); }
+  .claim-box { background:#f5f0e8; border:1px solid var(--line); border-radius:2px; padding:16px; margin-bottom:20px; }
+  .claim-row { display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; }
+  .claim-row:last-child { margin-bottom:0; border-top:1px solid var(--line); padding-top:8px; margin-top:4px; }
+  .claim-label { color:var(--ink-light); font-size:12px; }
+  .claim-total { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; color:var(--accent); }
+  .items-list { border:1px solid var(--line); border-radius:2px; overflow:hidden; margin-bottom:20px; }
+  .item-row { display:flex; justify-content:space-between; padding:7px 12px; font-size:13px; border-bottom:1px solid var(--line); }
+  .item-row:last-child { border-bottom:none; }
+  .item-row:nth-child(even) { background:#faf8f4; }
+  .field { margin-bottom:14px; }
+  .field label { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink-light); display:block; margin-bottom:5px; }
+  .field input, .field textarea { width:100%; border:1px solid var(--line); border-radius:2px; padding:9px 12px; font-size:14px; font-family:'Sarabun',sans-serif; color:var(--ink); background:white; outline:none; }
+  .field input:focus, .field textarea:focus { border-color:var(--ink); box-shadow:0 0 0 3px rgba(26,26,46,0.08); }
+  .field textarea { resize:vertical; min-height:70px; }
 
-  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; max-width: 560px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.1); overflow: hidden; }
-  .card-header { background: var(--ink); color: white; padding: 20px 28px; }
-  .card-header-sub { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
-  .card-header-title { font-size: 20px; font-weight: 700; margin-top: 2px; }
-  .card-body { padding: 28px; }
+  /* Signature */
+  .sig-preview-box { border:1px solid var(--line); border-radius:2px; padding:12px; background:white; text-align:center; min-height:80px; display:flex; align-items:center; justify-content:center; }
+  .sig-preview-box img { max-height:70px; max-width:100%; }
+  .sig-status { font-size:12px; color:var(--ink-light); }
+  .sig-not-found { font-size:12px; color:var(--accent); }
 
-  .claim-box { background: #f5f0e8; border: 1px solid var(--line); border-radius: 2px; padding: 20px; margin-bottom: 24px; }
-  .claim-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-  .claim-row:last-child { margin-bottom: 0; border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
-  .claim-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-light); }
-  .claim-value { font-size: 15px; font-weight: 500; color: var(--ink); }
-  .claim-total { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); }
+  /* Receipts */
+  .receipt-upload { border:2px dashed var(--line); border-radius:2px; padding:16px; text-align:center; cursor:pointer; background:#fafaf7; transition:all 0.12s; margin-bottom:8px; }
+  .receipt-upload:hover { border-color:var(--ink); background:#f5f0e8; }
+  .receipt-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .receipt-item { position:relative; width:80px; height:80px; border:1px solid var(--line); border-radius:2px; overflow:hidden; background:#f5f0e8; }
+  .receipt-item img { width:100%; height:100%; object-fit:cover; }
+  .receipt-item .remove { position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .receipt-item .pdf-icon { display:flex; align-items:center; justify-content:center; height:100%; font-size:28px; }
+  .upload-progress { font-size:12px; color:var(--ink-light); margin-top:4px; }
 
-  .items-list { margin: 16px 0; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
-  .item-row { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 13px; border-bottom: 1px solid var(--line); }
-  .item-row:last-child { border-bottom: none; }
-  .item-row:nth-child(even) { background: #faf8f4; }
-  .item-desc { color: var(--ink); }
-  .item-amt { font-family: 'IBM Plex Mono', monospace; color: var(--ink-light); }
-
-  .section-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-
-  .field { margin-bottom: 14px; }
-  .field label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-light); display: block; margin-bottom: 5px; }
-  .field input, .field textarea { width: 100%; border: 1px solid var(--line); border-radius: 2px; padding: 9px 12px; font-size: 14px; font-family: 'Sarabun', sans-serif; color: var(--ink); background: white; outline: none; }
-  .field input:focus, .field textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(26,26,46,0.08); }
-  .field textarea { resize: vertical; min-height: 70px; }
-
-  .btn-row { display: flex; gap: 12px; }
-  .btn { flex: 1; padding: 13px; border-radius: 2px; font-size: 14px; font-weight: 700; font-family: 'Sarabun', sans-serif; cursor: pointer; border: none; outline: none; transition: all 0.12s; }
-  .btn-approve { background: var(--success); color: white; }
-  .btn-approve:hover { background: #145530; }
-  .btn-reject { background: var(--accent); color: white; }
-  .btn-reject:hover { background: #a83516; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .result-box { display: none; text-align: center; padding: 32px; }
-  .result-icon { font-size: 48px; margin-bottom: 12px; }
-  .result-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-  .result-sub { font-size: 14px; color: var(--ink-light); }
-
-  .loading-box { text-align: center; padding: 40px; color: var(--ink-light); }
-  .spinner { width: 32px; height: 32px; border: 3px solid var(--line); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .btn-row { display:flex; gap:12px; margin-top:20px; }
+  .btn { flex:1; padding:13px; border-radius:2px; font-size:14px; font-weight:700; font-family:'Sarabun',sans-serif; cursor:pointer; border:none; outline:none; transition:all 0.12s; }
+  .btn-approve { background:var(--success); color:white; }
+  .btn-approve:hover { background:#145530; }
+  .btn-reject { background:var(--accent); color:white; }
+  .btn-reject:hover { background:#a83516; }
+  .btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .result-box { display:none; text-align:center; padding:32px; }
+  .result-icon { font-size:48px; margin-bottom:12px; }
+  .result-title { font-size:20px; font-weight:700; margin-bottom:6px; }
+  .result-sub { font-size:14px; color:var(--ink-light); }
+  .loading-box { text-align:center; padding:40px; color:var(--ink-light); }
+  .spinner { width:32px; height:32px; border:3px solid var(--line); border-top-color:var(--ink); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .divider { height:1px; background:var(--line); margin:20px 0; }
 </style>
 </head>
 <body>
-
 <div class="card">
   <div class="card-header">
     <div class="card-header-sub">Comfy Rooms Hospitality</div>
     <div class="card-header-title">อนุมัติใบขอเบิกค่าใช้จ่าย</div>
   </div>
   <div class="card-body">
-
-    <!-- Loading -->
     <div class="loading-box" id="loadingBox">
       <div class="spinner"></div>
       <div>กำลังโหลดข้อมูล...</div>
     </div>
 
-    <!-- Claim Info -->
     <div id="mainContent" style="display:none;">
+      <!-- Claim Info -->
+      <div class="section-label">รายละเอียดใบเบิก</div>
       <div class="claim-box">
-        <div class="claim-row">
-          <span class="claim-label">เลขที่เอกสาร</span>
-          <span class="claim-value" id="infoDocNo">-</span>
-        </div>
-        <div class="claim-row">
-          <span class="claim-label">ผู้เบิก</span>
-          <span class="claim-value" id="infoRequestBy">-</span>
-        </div>
-        <div class="claim-row">
-          <span class="claim-label">วันที่</span>
-          <span class="claim-value" id="infoDate">-</span>
-        </div>
-        <div class="claim-row">
-          <span class="claim-label">วัตถุประสงค์</span>
-          <span class="claim-value" id="infoObjective">-</span>
-        </div>
-        <div class="claim-row">
-          <span class="claim-label">โปรเจกต์</span>
-          <span class="claim-value" id="infoProject">-</span>
-        </div>
+        <div class="claim-row"><span class="claim-label">เลขที่</span><span id="infoDocNo" style="font-weight:600"></span></div>
+        <div class="claim-row"><span class="claim-label">ผู้เบิก</span><span id="infoRequestBy"></span></div>
+        <div class="claim-row"><span class="claim-label">วันที่</span><span id="infoDate"></span></div>
+        <div class="claim-row"><span class="claim-label">วัตถุประสงค์</span><span id="infoObjective"></span></div>
       </div>
-
-      <div class="section-label">รายการค่าใช้จ่าย</div>
       <div class="items-list" id="itemsList"></div>
-
-      <div class="claim-box" style="margin-top:16px;">
-        <div class="claim-row">
-          <span class="claim-label">ยอดรวมทั้งสิ้น</span>
-          <span class="claim-total" id="infoTotal">฿ 0.00</span>
-        </div>
+      <div class="claim-box">
+        <div class="claim-row"><span class="claim-label">ยอดรวมทั้งสิ้น</span><span class="claim-total" id="infoTotal"></span></div>
       </div>
 
-      <div style="margin: 24px 0 16px;">
-        <div class="section-label">การอนุมัติ</div>
-        <div class="field">
-          <label>ชื่อหัวหน้าส่วน / Approved By</label>
-          <input type="text" id="approverName" placeholder="ชื่อ-นามสกุล">
+      <div class="divider"></div>
+
+      <!-- Receipts Upload -->
+      <div class="section-label">แนบใบเสร็จ / หลักฐาน (สูงสุด 5 ไฟล์)</div>
+      <div class="receipt-upload" onclick="document.getElementById('receiptInput').click()">
+        📎 คลิกเพื่อเพิ่มรูปใบเสร็จ (JPG, PNG, PDF)
+        <div style="font-size:11px;color:#4a4a6a;margin-top:4px">เลือกได้หลายไฟล์พร้อมกัน</div>
+      </div>
+      <input type="file" id="receiptInput" accept="image/*,.pdf" multiple style="display:none" onchange="addReceipts(this)">
+      <div class="receipt-list" id="receiptList"></div>
+      <div class="upload-progress" id="uploadProgress"></div>
+
+      <div class="divider"></div>
+
+      <!-- Approver -->
+      <div class="section-label">การอนุมัติ</div>
+      <div class="field">
+        <label>ชื่อผู้อนุมัติ (ต้องตรงกับที่ลงทะเบียนไว้)</label>
+        <input type="text" id="approverName" placeholder="กรอกชื่อแล้วกด Enter เพื่อดึงลายเซ็น" onkeypress="if(event.key==='Enter') loadSignature()">
+      </div>
+      <div class="field">
+        <label>ลายเซ็น</label>
+        <div class="sig-preview-box" id="sigBox">
+          <span class="sig-status">กรอกชื่อแล้วกด Enter เพื่อดึงลายเซ็น</span>
         </div>
-        <div class="field">
-          <label>หมายเหตุ / Comment (ถ้ามี)</label>
-          <textarea id="approverComment" placeholder="ระบุเหตุผล (กรณีไม่อนุมัติ)"></textarea>
-        </div>
+      </div>
+      <div class="field">
+        <label>หมายเหตุ / Comment</label>
+        <textarea id="approverComment" placeholder="ระบุเหตุผล (กรณีไม่อนุมัติ)"></textarea>
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-reject" onclick="submitDecision('rejected')">
-          ❌ ไม่อนุมัติ
-        </button>
-        <button class="btn btn-approve" onclick="submitDecision('approved')">
-          ✅ อนุมัติ
-        </button>
+        <button class="btn btn-reject" onclick="submitDecision('rejected')">❌ ไม่อนุมัติ</button>
+        <button class="btn btn-approve" onclick="submitDecision('approved')">✅ อนุมัติ</button>
       </div>
     </div>
 
-    <!-- Result -->
     <div class="result-box" id="resultBox">
       <div class="result-icon" id="resultIcon">✅</div>
       <div class="result-title" id="resultTitle">อนุมัติแล้ว</div>
       <div class="result-sub" id="resultSub">ระบบแจ้งฝ่ายบัญชีแล้ว</div>
     </div>
-
   </div>
 </div>
 
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8LdqzrE6gTirkZXM8CeQoBKmBLCqLKc2EBDM3JVa1BfrXS-8yOh4zouy33IQXZyVnyQ/exec';
 let claimData = null;
+let signatureData = '';
+let receiptFiles = [];
+let uploadedReceipts = [];
 
 function appsScriptRequest(params) {
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('timeout')), 15000);
+    const timeout = setTimeout(() => reject(new Error('timeout')), 30000);
     const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
     fetch(url, { redirect: 'follow' })
       .then(r => r.text())
-      .then(text => {
-        clearTimeout(timeout);
-        try { resolve(JSON.parse(text)); }
-        catch(e) { reject(new Error('parse error')); }
-      })
+      .then(text => { clearTimeout(timeout); try { resolve(JSON.parse(text)); } catch(e) { reject(new Error('parse error')); } })
       .catch(err => { clearTimeout(timeout); reject(err); });
   });
 }
@@ -165,62 +156,124 @@ function appsScriptRequest(params) {
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const docNo = params.get('docNo');
-  if (!docNo) {
-    showError('ไม่พบเลขที่เอกสาร กรุณาเปิดลิงก์จาก Lark อีกครั้ง');
-    return;
-  }
+  if (!docNo) { showError('ไม่พบเลขที่เอกสาร'); return; }
   try {
     const res = await appsScriptRequest({ action: 'getClaim', docNo: docNo });
     if (res.success && res.data) {
       claimData = res.data;
       renderClaim(claimData);
-    } else {
-      throw new Error(res.error || 'ไม่พบข้อมูล');
-    }
-  } catch(err) {
-    showError('ไม่สามารถโหลดข้อมูลได้: ' + err.message);
-  }
+    } else { throw new Error(res.error || 'ไม่พบข้อมูล'); }
+  } catch(err) { showError('ไม่สามารถโหลดข้อมูลได้: ' + err.message); }
 });
 
 function renderClaim(data) {
   document.getElementById('infoDocNo').textContent = data.docNo || '-';
   document.getElementById('infoRequestBy').textContent = data.requestBy || '-';
   document.getElementById('infoDate').textContent = data.requestDate || '-';
-  document.getElementById('infoObjective').textContent = data.objective || '-';
-  document.getElementById('infoProject').textContent = data.project || '-';
-  document.getElementById('infoTotal').textContent =
-    '฿ ' + parseFloat(data.total || 0).toLocaleString('th-TH', {minimumFractionDigits:2});
+  document.getElementById('infoObjective').textContent = (data.objective || '-') + (data.otherObjective ? ' — ' + data.otherObjective : '');
+  document.getElementById('infoTotal').textContent = '฿ ' + parseFloat(data.total||0).toLocaleString('th-TH', {minimumFractionDigits:2});
   const list = document.getElementById('itemsList');
   list.innerHTML = '';
-  (data.items || []).filter(it => it.desc && it.amt).forEach(it => {
+  (data.items||[]).filter(it => it.desc).forEach(it => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.innerHTML = '<span class="item-desc">' + it.desc + '</span><span class="item-amt">฿ ' + parseFloat(it.amt).toLocaleString('th-TH', {minimumFractionDigits:2}) + '</span>';
+    row.innerHTML = '<span>' + it.desc + '</span><span style="font-family:monospace">฿ ' + parseFloat(it.amt||0).toLocaleString('th-TH', {minimumFractionDigits:2}) + '</span>';
     list.appendChild(row);
   });
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
 }
 
-function showError(msg) {
-  document.getElementById('loadingBox').style.display = 'none';
-  document.getElementById('resultBox').style.display = 'block';
-  document.getElementById('resultIcon').textContent = '⚠️';
-  document.getElementById('resultTitle').textContent = 'เกิดข้อผิดพลาด';
-  document.getElementById('resultSub').textContent = msg;
+async function loadSignature() {
+  const name = document.getElementById('approverName').value.trim();
+  if (!name) return;
+  const box = document.getElementById('sigBox');
+  box.innerHTML = '<span class="sig-status">⏳ กำลังดึงลายเซ็น...</span>';
+  try {
+    const res = await appsScriptRequest({ action: 'getSignature', name: name });
+    if (res.success && res.signature) {
+      signatureData = res.signature;
+      box.innerHTML = '<img src="' + res.signature + '" style="max-height:80px;max-width:100%">';
+    } else {
+      signatureData = '';
+      box.innerHTML = '<span class="sig-not-found">⚠ ไม่พบลายเซ็นของ "' + name + '" — <a href="/expense-claim/signature-setup.html" target="_blank">ลงทะเบียนที่นี่</a></span>';
+    }
+  } catch(err) {
+    box.innerHTML = '<span class="sig-not-found">⚠ ไม่สามารถดึงลายเซ็นได้</span>';
+  }
+}
+
+function addReceipts(input) {
+  const files = Array.from(input.files);
+  const remaining = 5 - receiptFiles.length;
+  if (remaining <= 0) { alert('แนบได้สูงสุด 5 ไฟล์ครับ'); return; }
+  const toAdd = files.slice(0, remaining);
+  if (files.length > remaining) alert('เพิ่มได้อีก ' + remaining + ' ไฟล์เท่านั้น');
+  toAdd.forEach(file => {
+    receiptFiles.push(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const item = document.createElement('div');
+      item.className = 'receipt-item';
+      item.id = 'receipt_' + receiptFiles.length;
+      if (file.type === 'application/pdf') {
+        item.innerHTML = '<div class="pdf-icon">📄</div><button class="remove" onclick="removeReceipt(this,' + (receiptFiles.length-1) + ')">×</button>';
+      } else {
+        item.innerHTML = '<img src="' + e.target.result + '"><button class="remove" onclick="removeReceipt(this,' + (receiptFiles.length-1) + ')">×</button>';
+      }
+      document.getElementById('receiptList').appendChild(item);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function removeReceipt(btn, idx) {
+  receiptFiles.splice(idx, 1);
+  btn.parentElement.remove();
+}
+
+async function uploadAllReceipts(docNo) {
+  if (receiptFiles.length === 0) return [];
+  const progress = document.getElementById('uploadProgress');
+  const urls = [];
+  for (let i = 0; i < receiptFiles.length; i++) {
+    const file = receiptFiles[i];
+    progress.textContent = 'กำลังอัปโหลดใบเสร็จ ' + (i+1) + '/' + receiptFiles.length + '...';
+    const base64 = await new Promise((res) => {
+      const reader = new FileReader();
+      reader.onload = (e) => res(e.target.result);
+      reader.readAsDataURL(file);
+    });
+    const result = await appsScriptRequest({
+      action: 'uploadReceipt',
+      data: JSON.stringify({ docNo: docNo, fileName: file.name, imageData: base64, mimeType: file.type })
+    });
+    if (result.success) urls.push(result.url);
+  }
+  progress.textContent = 'อัปโหลดใบเสร็จครบแล้ว ✓';
+  return urls;
 }
 
 async function submitDecision(decision) {
   const approverName = document.getElementById('approverName').value.trim();
-  if (!approverName) { alert('กรุณากรอกชื่อหัวหน้าส่วนก่อนครับ'); return; }
+  if (!approverName) { alert('กรุณากรอกชื่อผู้อนุมัติครับ'); return; }
+
   const btns = document.querySelectorAll('.btn');
   btns.forEach(b => b.disabled = true);
-  const payload = {
-    docNo: claimData.docNo, decision, approverName,
-    comment: document.getElementById('approverComment').value.trim(),
-    claimData
-  };
+
   try {
+    // อัปโหลดใบเสร็จก่อน
+    await uploadAllReceipts(claimData.docNo);
+
+    const payload = {
+      docNo: claimData.docNo,
+      decision,
+      approverName,
+      signatureData,
+      comment: document.getElementById('approverComment').value.trim(),
+      claimData
+    };
     const res = await appsScriptRequest({ action: 'approvalDecision', data: JSON.stringify(payload) });
     if (res.success) {
       document.getElementById('mainContent').style.display = 'none';
@@ -234,13 +287,15 @@ async function submitDecision(decision) {
         document.getElementById('resultTitle').textContent = 'ไม่อนุมัติ';
         document.getElementById('resultSub').textContent = 'ระบบแจ้งผู้เบิกเรียบร้อยแล้ว';
       }
-    } else {
-      throw new Error(res.error || 'ไม่สำเร็จ');
-    }
+    } else { throw new Error(res.error || 'ไม่สำเร็จ'); }
   } catch(err) {
     alert('เกิดข้อผิดพลาด: ' + err.message);
     btns.forEach(b => b.disabled = false);
   }
+}
+
+function showError(msg) {
+  document.getElementById('loadingBox').innerHTML = '<div style="font-size:32px;margin-bottom:12px">⚠️</div><div>' + msg + '</div>';
 }
 </script>
 </body>
