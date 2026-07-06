@@ -524,6 +524,13 @@
         </div>
       </div>
 
+      <div class="row row-2">
+        <div class="field" style="grid-column: span 2;">
+          <label>Lark Webhook สำหรับแจ้งผลอนุมัติ (กรอกครั้งแรกครั้งเดียว)</label>
+          <input type="text" id="requesterWebhook" placeholder="https://open.larksuite.com/open-apis/bot/v2/hook/xxxx-xxxx (เว้นว่างได้ถ้าเคยกรอกแล้ว)">
+        </div>
+      </div>
+
       <div class="divider"></div>
 
       <div class="section-label">วัตถุประสงค์ / Objective</div>
@@ -707,6 +714,8 @@ window.addEventListener('DOMContentLoaded', () => {
   setDefaultDates();
   document.getElementById('docNo').value = 'DRAFT';
   document.getElementById('displayDocNo').textContent = 'DRAFT';
+  const savedWebhook = localStorage.getItem('comfyRoomsRequesterWebhook');
+  if (savedWebhook) document.getElementById('requesterWebhook').value = savedWebhook;
 });
 
 function buildItemRows() {
@@ -880,6 +889,12 @@ async function submitForApproval() {
 
     const saveRes = await appsScriptRequest({ action: 'saveClaim', data: JSON.stringify(data) });
     if (!saveRes.success) throw new Error(saveRes.error || 'บันทึกไม่สำเร็จ');
+
+    const webhookUrl = document.getElementById('requesterWebhook').value.trim();
+    if (webhookUrl) {
+      localStorage.setItem('comfyRoomsRequesterWebhook', webhookUrl);
+      await appsScriptRequest({ action: 'saveRequesterWebhook', data: JSON.stringify({ name: data.requestBy, webhookUrl }) });
+    }
 
     if (receiptFiles.length > 0) {
       showBanner('⏳ กำลังอัปโหลดใบเสร็จ...', 'success');
