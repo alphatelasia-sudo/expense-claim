@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ลงทะเบียนลายเซ็น – Expense System</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sarabun', sans-serif; background: #e8e4dc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .card { background: white; border-radius: 4px; max-width: 520px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.1); overflow: hidden; }
+  .card-header { background: #1a1a2e; color: white; padding: 20px 28px; }
+  .card-header-sub { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
+  .card-header-title { font-size: 20px; font-weight: 700; margin-top: 2px; }
+  .card-body { padding: 28px; }
+  .section-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #4a4a6a; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: #d8d4cc; }
+  .field { margin-bottom: 16px; }
+  .field label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #4a4a6a; display: block; margin-bottom: 5px; }
+  .field input, .field select { width: 100%; border: 1px solid #d8d4cc; border-radius: 2px; padding: 9px 12px; font-size: 14px; font-family: 'Sarabun', sans-serif; color: #1a1a2e; background: white; outline: none; }
+  .field input:focus, .field select:focus { border-color: #1a1a2e; box-shadow: 0 0 0 3px rgba(26,26,46,0.08); }
+  .sig-box { border: 2px dashed #d8d4cc; border-radius: 4px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; background: #fafaf7; }
+  .sig-box:hover { border-color: #1a1a2e; background: #f5f0e8; }
+  .sig-preview { max-width: 100%; max-height: 120px; margin-top: 12px; display: none; border: 1px solid #d8d4cc; border-radius: 2px; padding: 8px; background: white; }
+  .btn { width: 100%; padding: 13px; border-radius: 2px; font-size: 14px; font-weight: 700; font-family: 'Sarabun', sans-serif; cursor: pointer; border: none; outline: none; transition: all 0.12s; margin-top: 8px; }
+  .btn-primary { background: #1a1a2e; color: white; }
+  .btn-primary:hover { background: #0f0f20; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .result-box { display: none; text-align: center; padding: 24px; }
+  .result-icon { font-size: 48px; margin-bottom: 12px; }
+  .result-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .result-sub { font-size: 14px; color: #4a4a6a; }
+  .company-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab { flex: 1; padding: 10px; border: 1px solid #d8d4cc; border-radius: 2px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.12s; background: white; }
+  .tab.active { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <div class="card-header-sub">Expense System</div>
+    <div class="card-header-title">ลงทะเบียนลายเซ็น</div>
+  </div>
+  <div class="card-body">
+    <div id="formSection">
+      <div class="section-label">เลือกบริษัท</div>
+      <div class="company-tabs">
+        <div class="tab active" onclick="selectCompany('comfy')">Comfy Rooms</div>
+        <div class="tab" onclick="selectCompany('alphatel')">Alphatel Asia</div>
+      </div>
+
+      <div class="section-label">ข้อมูลผู้อนุมัติ</div>
+      <div class="field">
+        <label>ชื่อ-นามสกุล (ต้องตรงกับที่กรอกตอนอนุมัติ)</label>
+        <input type="text" id="approverName" placeholder="เช่น Kittipong P.">
+      </div>
+
+      <div class="section-label">ลายเซ็น</div>
+      <div class="sig-box" onclick="document.getElementById('sigFile').click()">
+        <div>📎 คลิกเพื่ออัปโหลดรูปลายเซ็น</div>
+        <div style="font-size:12px;color:#4a4a6a;margin-top:4px">รองรับ JPG, PNG ขนาดไม่เกิน 2MB</div>
+        <img id="sigPreview" class="sig-preview">
+      </div>
+      <input type="file" id="sigFile" accept="image/*" style="display:none" onchange="previewSig(this)">
+
+      <button class="btn btn-primary" onclick="saveSig()" id="saveBtn" style="margin-top:20px">
+        💾 บันทึกลายเซ็น
+      </button>
+    </div>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-icon">✅</div>
+      <div class="result-title" id="resultTitle">บันทึกลายเซ็นแล้ว</div>
+      <div class="result-sub" id="resultSub">ลายเซ็นจะถูกใช้อัตโนมัติทุกครั้งที่อนุมัติ</div>
+      <button class="btn btn-primary" onclick="resetForm()" style="margin-top:20px">ลงทะเบียนคนถัดไป</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPTS = {
+  comfy: 'https://script.google.com/macros/s/AKfycby8LdqzrE6gTirkZXM8CeQoBKmBLCqLKc2EBDM3JVa1BfrXS-8yOh4zouy33IQXZyVnyQ/exec',
+  alphatel: 'https://script.google.com/macros/s/AKfycbykkaDZf50RRLyuB6WAbkzZwz01gM-ViWuQ_wFjHJ2_wwcQH2NE-V9TaZ6xwYZLynzl/exec'
+};
+let selectedCompany = 'comfy';
+let sigBase64 = '';
+
+function selectCompany(c) {
+  selectedCompany = c;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function previewSig(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { alert('ไฟล์ใหญ่เกิน 2MB ครับ'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    sigBase64 = e.target.result;
+    const preview = document.getElementById('sigPreview');
+    preview.src = sigBase64;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function appsScriptRequest(company, params) {
+  const url = APPS_SCRIPTS[company] + '?' + new URLSearchParams(params).toString();
+  return fetch(url, { redirect: 'follow' }).then(r => r.json());
+}
+
+async function saveSig() {
+  const name = document.getElementById('approverName').value.trim();
+  if (!name) { alert('กรุณากรอกชื่อก่อนครับ'); return; }
+  if (!sigBase64) { alert('กรุณาอัปโหลดรูปลายเซ็นก่อนครับ'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = '⏳ กำลังบันทึก...';
+  btn.disabled = true;
+
+  try {
+    const res = await appsScriptRequest(selectedCompany, {
+      action: 'saveSignature',
+      data: JSON.stringify({ name: name, imageData: sigBase64 })
+    });
+    if (res.success) {
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('resultBox').style.display = 'block';
+      document.getElementById('resultTitle').textContent = 'บันทึกลายเซ็นของ ' + name + ' แล้ว';
+      document.getElementById('resultSub').textContent = 'บริษัท: ' + (selectedCompany === 'comfy' ? 'Comfy Rooms' : 'Alphatel Asia');
+    } else {
+      throw new Error(res.error);
+    }
+  } catch(err) {
+    alert('เกิดข้อผิดพลาด: ' + err.message);
+    btn.textContent = '💾 บันทึกลายเซ็น';
+    btn.disabled = false;
+  }
+}
+
+function resetForm() {
+  document.getElementById('formSection').style.display = 'block';
+  document.getElementById('resultBox').style.display = 'none';
+  document.getElementById('approverName').value = '';
+  document.getElementById('sigPreview').style.display = 'none';
+  document.getElementById('sigPreview').src = '';
+  document.getElementById('sigFile').value = '';
+  document.getElementById('saveBtn').textContent = '💾 บันทึกลายเซ็น';
+  document.getElementById('saveBtn').disabled = false;
+  sigBase64 = '';
+}
+</script>
+</body>
+</html>
