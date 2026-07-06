@@ -704,7 +704,8 @@ function appsScriptRequest(params) {
 window.addEventListener('DOMContentLoaded', () => {
   buildItemRows();
   setDefaultDates();
-  fetchNextDocNo();
+  document.getElementById('docNo').value = 'DRAFT';
+  document.getElementById('displayDocNo').textContent = 'DRAFT';
 });
 
 function buildItemRows() {
@@ -890,7 +891,8 @@ function clearForm() {
   setDefaultDates();
   calcTotal();
   updatePreview();
-  fetchNextDocNo();
+  document.getElementById('docNo').value = 'DRAFT';
+  document.getElementById('displayDocNo').textContent = 'DRAFT';
 }
 
 // ── Print ─────────────────────────────────────────────────────────
