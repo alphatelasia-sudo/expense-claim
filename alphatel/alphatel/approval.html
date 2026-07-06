@@ -192,10 +192,11 @@ async function loadReceipts(docNo) {
         const item = document.createElement('div');
         item.className = 'receipt-item';
         const isPdf = (receipt.name || '').toLowerCase().endsWith('.pdf');
+        const linkUrl = receipt.viewUrl || receipt.url;
         if (isPdf) {
-          item.innerHTML = '<a href="' + receipt.url + '" target="_blank" class="pdf-icon">📄</a>';
+          item.innerHTML = '<a href="' + linkUrl + '" target="_blank" class="pdf-icon">📄</a>';
         } else {
-          item.innerHTML = '<a href="' + receipt.url + '" target="_blank"><img src="' + receipt.url + '"></a>';
+          item.innerHTML = '<a href="' + linkUrl + '" target="_blank"><img src="' + receipt.url + '"></a>';
         }
         list.appendChild(item);
       });
