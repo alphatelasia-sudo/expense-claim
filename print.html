@@ -3,152 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comfy Rooms – ใบขอเบิกค่าใช้จ่าย</title>
+<title>Comfy Rooms Hospitality – ใบขอเบิกค่าใช้จ่าย</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #1a1a2e; --ink-light: #4a4a6a;
-    --paper: #fafaf7; --line: #d8d4cc;
-    --accent: #c8421a; --success: #1a6b3c;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --ink:#1a1a2e; --ink-light:#4a4a6a; --paper:#fafaf7; --line:#d8d4cc; --accent:#c8421a; --success:#1a6b3c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Sarabun',sans-serif; background:#e8e4dc; padding:24px; color:var(--ink); }
+  .action-bar { max-width:800px; margin:0 auto 16px; display:flex; gap:10px; justify-content:flex-end; }
+  .btn { padding:10px 20px; border-radius:2px; font-size:13px; font-weight:600; font-family:'Sarabun',sans-serif; cursor:pointer; border:none; outline:none; }
+  .btn-print { background:#1a1a2e; color:white; }
+  .doc { max-width:800px; margin:0 auto; background:white; border:1px solid var(--line); box-shadow:0 2px 16px rgba(0,0,0,0.08); }
+  .loading { text-align:center; padding:60px; color:var(--ink-light); }
+  .spinner { width:32px; height:32px; border:3px solid var(--line); border-top-color:var(--ink); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .doc-header { background:var(--ink); color:white; padding:20px 28px; display:flex; justify-content:space-between; align-items:center; }
+  .doc-company { font-size:11px; letter-spacing:2px; text-transform:uppercase; opacity:0.7; }
+  .doc-title { font-size:20px; font-weight:700; margin-top:2px; }
+  .doc-no-label { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; opacity:0.6; text-align:right; }
+  .doc-no-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:500; text-align:right; margin-top:2px; }
+  .doc-body { padding:24px 28px; }
+  .section-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-light); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--line); }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px 20px; margin-bottom:20px; }
+  .info-label { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ink-light); margin-bottom:3px; }
+  .info-value { font-size:14px; }
+  .divider { height:1px; background:var(--line); margin:20px 0; }
+  .items-table { width:100%; border-collapse:collapse; margin-bottom:8px; }
+  .items-table thead tr { background:#f5f0e8; border-bottom:2px solid var(--ink); }
+  .items-table thead th { padding:8px 10px; text-align:left; font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-light); }
+  .items-table thead th.amt-col { width:140px; text-align:right; }
+  .items-table tbody tr { border-bottom:1px solid var(--line); }
+  .items-table tbody td { padding:8px 10px; font-size:13px; }
+  .items-table tbody td.amt { text-align:right; font-family:'IBM Plex Mono',monospace; }
+  .items-table tfoot tr { background:#f5f0e8; }
+  .items-table tfoot td { padding:10px; }
+  .total-label { text-align:right; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ink-light); padding-right:14px; }
+  .total-value { text-align:right; font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); }
+  .sig-row { display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr; border:1px solid var(--line); border-radius:2px; overflow:hidden; margin-top:20px; }
+  .sig-col { padding:16px 20px; }
+  .sig-divider { background:var(--line); }
+  .sig-title { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ink-light); }
+  .sig-sub { font-size:11px; color:var(--ink-light); margin-bottom:8px; }
+  .sig-image { height:60px; display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
+  .sig-image img { max-height:55px; max-width:100%; }
+  .sig-line { border-bottom:1px solid var(--ink); margin:0 8px 6px; }
+  .sig-name { font-size:12px; color:var(--ink); text-align:center; font-weight:500; }
+  .sig-date { font-size:11px; color:var(--ink-light); text-align:center; margin-top:4px; }
+  .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .status-approved { background:#e8f5e9; color:var(--success); }
+  .status-pending { background:#fff8e1; color:#7a5c00; }
 
-  body {
-    font-family: 'Sarabun', sans-serif;
-    background: #e8e4dc;
-    padding: 24px;
-    color: var(--ink);
-  }
-
-  .action-bar {
-    max-width: 800px;
-    margin: 0 auto 16px;
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-  }
-  .btn {
-    padding: 10px 20px;
-    border-radius: 2px;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: 'Sarabun', sans-serif;
-    cursor: pointer;
-    border: none;
-    outline: none;
-  }
-  .btn-print { background: #1a1a2e; color: white; }
-  .btn-print:hover { background: #0f0f20; }
-
-  .doc {
-    max-width: 800px;
-    margin: 0 auto;
-    background: white;
-    border: 1px solid var(--line);
-    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  }
-
-  /* Loading */
-  .loading {
-    text-align: center;
-    padding: 60px;
-    color: var(--ink-light);
-  }
-  .spinner {
-    width: 32px; height: 32px;
-    border: 3px solid var(--line);
-    border-top-color: var(--ink);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 12px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Document */
-  .doc-header {
-    background: var(--ink);
-    color: white;
-    padding: 20px 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .doc-header-left { }
-  .doc-company { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
-  .doc-title { font-size: 20px; font-weight: 700; margin-top: 2px; }
-  .doc-no-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6; text-align: right; }
-  .doc-no-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 500; text-align: right; margin-top: 2px; }
-
-  .doc-body { padding: 24px 28px; }
-
-  .section-label {
-    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--ink-light); font-weight: 600; margin-bottom: 10px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px 20px; margin-bottom: 20px; }
-  .info-item { }
-  .info-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 3px; }
-  .info-value { font-size: 14px; color: var(--ink); }
-
-  .divider { height: 1px; background: var(--line); margin: 20px 0; }
-
-  .items-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-  .items-table thead tr { background: #f5f0e8; border-bottom: 2px solid var(--ink); }
-  .items-table thead th {
-    padding: 8px 10px; text-align: left;
-    font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-    text-transform: uppercase; color: var(--ink-light);
-  }
-  .items-table thead th.num-col { width: 36px; text-align: center; }
-  .items-table thead th.amt-col { width: 140px; text-align: right; }
-  .items-table thead th.rmk-col { width: 180px; }
-  .items-table tbody tr { border-bottom: 1px solid var(--line); }
-  .items-table tbody td { padding: 8px 10px; font-size: 13px; }
-  .items-table tbody td.num { text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-light); }
-  .items-table tbody td.amt { text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
-  .items-table tfoot tr { background: #f5f0e8; }
-  .items-table tfoot td { padding: 10px; }
-  .total-label { text-align: right; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-light); padding-right: 14px; }
-  .total-value { text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); }
-
-  /* Signatures */
-  .sig-row { display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; margin-top: 20px; }
-  .sig-col { padding: 16px 20px; }
-  .sig-divider { background: var(--line); }
-  .sig-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-light); }
-  .sig-sub { font-size: 11px; color: var(--ink-light); margin-bottom: 24px; }
-  .sig-line { border-bottom: 1px solid var(--ink); margin: 0 8px 6px; }
-  .sig-name { font-size: 12px; color: var(--ink); text-align: center; font-weight: 500; }
-  .sig-date { font-size: 11px; color: var(--ink-light); text-align: center; margin-top: 4px; }
-
-  /* Status badge */
-  .status-badge {
-    display: inline-block; padding: 3px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
-  }
-  .status-approved { background: #e8f5e9; color: var(--success); }
-  .status-pending { background: #fff8e1; color: #7a5c00; }
-  .status-rejected { background: #fce4ec; color: #c62828; }
+  /* Receipts */
+  .receipts-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px; }
+  .receipt-thumb { border:1px solid var(--line); border-radius:2px; overflow:hidden; }
+  .receipt-thumb img { width:100%; height:120px; object-fit:cover; }
+  .receipt-thumb .pdf-placeholder { height:120px; background:#f5f0e8; display:flex; align-items:center; justify-content:center; font-size:36px; }
+  .receipt-thumb .receipt-name { padding:4px 8px; font-size:10px; color:var(--ink-light); background:#fafaf7; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   @media print {
-    @page { margin: 12mm; size: A4; }
-    body { background: white; padding: 0; }
-    .action-bar { display: none; }
-    .doc { box-shadow: none; border: 1px solid #ccc; max-width: 100%; }
+    @page { margin:12mm; size:A4; }
+    body { background:white; padding:0; }
+    .action-bar { display:none; }
+    .doc { box-shadow:none; border:1px solid #ccc; max-width:100%; }
+    .receipts-grid { break-inside:avoid; }
   }
 </style>
 </head>
 <body>
-
 <div class="action-bar" id="actionBar">
-  <button class="btn btn-print" onclick="window.print()">
-    🖨️ พิมพ์เอกสาร
-  </button>
+  <button class="btn btn-print" onclick="window.print()">🖨️ พิมพ์เอกสาร</button>
 </div>
-
 <div class="doc" id="docContent">
   <div class="loading" id="loadingBox">
     <div class="spinner"></div>
@@ -166,11 +90,7 @@ function appsScriptRequest(params) {
     const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
     fetch(url, { redirect: 'follow' })
       .then(r => r.text())
-      .then(text => {
-        clearTimeout(timeout);
-        try { resolve(JSON.parse(text)); }
-        catch(e) { reject(new Error('parse error')); }
-      })
+      .then(text => { clearTimeout(timeout); try { resolve(JSON.parse(text)); } catch(e) { reject(new Error('parse error')); } })
       .catch(err => { clearTimeout(timeout); reject(err); });
   });
 }
@@ -180,113 +100,89 @@ window.addEventListener('DOMContentLoaded', async () => {
   const docNo = params.get('docNo');
   if (!docNo) { showError('ไม่พบเลขที่เอกสาร'); return; }
   try {
-    const res = await appsScriptRequest({ action: 'getClaim', docNo: docNo });
-    if (res.success && res.data) {
-      renderDoc(res.data);
-    } else {
-      throw new Error(res.error || 'ไม่พบข้อมูล');
-    }
-  } catch(err) {
-    showError('ไม่สามารถโหลดข้อมูลได้: ' + err.message);
-  }
+    const [claimRes, receiptRes, sigRes] = await Promise.all([
+      appsScriptRequest({ action: 'getClaim', docNo: docNo }),
+      appsScriptRequest({ action: 'getReceipts', docNo: docNo }),
+      appsScriptRequest({ action: 'getClaim', docNo: docNo }).then(r => {
+        if (r.success && r.data && r.data.approvedBy) {
+          return appsScriptRequest({ action: 'getSignature', name: r.data.approvedBy });
+        }
+        return { success: false };
+      })
+    ]);
+    if (claimRes.success && claimRes.data) {
+      const sigData = sigRes.success ? sigRes.signature : '';
+      const receipts = receiptRes.success ? receiptRes.urls : [];
+      renderDoc(claimRes.data, sigData, receipts);
+    } else { throw new Error(claimRes.error || 'ไม่พบข้อมูล'); }
+  } catch(err) { showError('ไม่สามารถโหลดข้อมูลได้: ' + err.message); }
 });
 
-function renderDoc(d) {
+function renderDoc(d, sigData, receipts) {
   const fmt = (n) => parseFloat(n||0).toLocaleString('th-TH', {minimumFractionDigits:2});
   const status = d.status || 'รอการอนุมัติ';
-  const statusClass = status === 'อนุมัติ' ? 'status-approved' : status === 'ไม่อนุมัติ' ? 'status-rejected' : 'status-pending';
-
-  // Build items rows
+  const statusClass = status === 'อนุมัติ' ? 'status-approved' : 'status-pending';
   let itemRows = '';
   let num = 1;
-  (d.items || []).filter(it => it.desc).forEach(it => {
-    itemRows += `<tr>
-      <td class="num">${num++}</td>
-      <td>${it.desc}</td>
-      <td class="amt">฿ ${fmt(it.amt)}</td>
-      <td style="font-size:12px;color:var(--ink-light)">${it.rmk||'-'}</td>
-    </tr>`;
+  (d.items||[]).filter(it => it.desc).forEach(it => {
+    itemRows += '<tr><td>' + (num++) + '</td><td>' + it.desc + '</td><td class="amt">฿ ' + fmt(it.amt) + '</td><td style="font-size:12px;color:#4a4a6a">' + (it.rmk||'-') + '</td></tr>';
   });
-
-  // Fill empty rows to at least 5
   while (num <= 5) {
-    itemRows += `<tr><td class="num" style="color:#ddd">${num++}</td><td style="color:#ddd">-</td><td></td><td></td></tr>`;
+    itemRows += '<tr><td style="color:#ddd">' + (num++) + '</td><td style="color:#ddd">-</td><td></td><td></td></tr>';
   }
 
-  const approvedBy = d.approvedBy || '';
-  const comment = d.comment || '';
+  const sigHtml = sigData
+    ? '<div class="sig-image"><img src="' + sigData + '"></div>'
+    : '<div style="height:60px;"></div>';
 
-  document.getElementById('mainContent').innerHTML = `
-    <div class="doc-header">
-      <div class="doc-header-left">
-        <div class="doc-company">Comfy Rooms Hospitality Co., Ltd.</div>
-        <div class="doc-title">ใบขอเบิกค่าใช้จ่าย / Expense Claim Form</div>
-      </div>
-      <div>
-        <div class="doc-no-label">Doc No.</div>
-        <div class="doc-no-value">${d.docNo}</div>
-      </div>
-    </div>
-    <div class="doc-body">
-      <div class="section-label">ข้อมูลผู้ขอเบิก</div>
-      <div class="info-grid">
-        <div class="info-item"><div class="info-label">ชื่อผู้เบิก</div><div class="info-value">${d.requestBy||'-'}</div></div>
-        <div class="info-item"><div class="info-label">วันที่</div><div class="info-value">${d.requestDate||'-'}</div></div>
-        <div class="info-item"><div class="info-label">ถึง</div><div class="info-value">${d.toField||'-'}</div></div>
-        <div class="info-item"><div class="info-label">สถานะ</div><div class="info-value"><span class="status-badge ${statusClass}">${status}</span></div></div>
-        <div class="info-item" style="grid-column:span 2"><div class="info-label">วัตถุประสงค์</div><div class="info-value">${d.objective||'-'}${d.otherObjective ? ' — ' + d.otherObjective : ''}</div></div>
-        <div class="info-item" style="grid-column:span 2"><div class="info-label">Sale Order / Project</div><div class="info-value">${d.project||'-'}</div></div>
-      </div>
+  let receiptsHtml = '';
+  if (receipts && receipts.length > 0) {
+    receiptsHtml = '<div class="divider"></div><div class="section-label">ใบเสร็จ / หลักฐานแนบ</div><div class="receipts-grid">';
+    receipts.forEach(r => {
+      const isPdf = r.name && r.name.toLowerCase().endsWith('.pdf');
+      receiptsHtml += '<div class="receipt-thumb">';
+      if (isPdf) {
+        receiptsHtml += '<div class="pdf-placeholder">📄</div>';
+      } else {
+        receiptsHtml += '<img src="' + r.url + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'><rect width=\'100%\' height=\'100%\' fill=\'%23f5f0e8\'/></svg>\'">';
+      }
+      receiptsHtml += '<div class="receipt-name">' + (r.name||'ใบเสร็จ') + '</div></div>';
+    });
+    receiptsHtml += '</div>';
+  }
 
-      <div class="section-label">รายการค่าใช้จ่าย</div>
-      <table class="items-table">
-        <thead><tr>
-          <th class="num-col">#</th>
-          <th>รายการ / Description</th>
-          <th class="amt-col">จำนวนเงิน / Amount</th>
-          <th class="rmk-col">หมายเหตุ</th>
-        </tr></thead>
-        <tbody>${itemRows}</tbody>
-        <tfoot><tr>
-          <td colspan="2" class="total-label">รวมทั้งสิ้น / Total</td>
-          <td class="total-value">฿ ${fmt(d.total)}</td>
-          <td></td>
-        </tr></tfoot>
-      </table>
-
-      ${comment ? `<div style="margin-top:12px;padding:10px 14px;background:#fff8e1;border-radius:2px;font-size:13px;color:#7a5c00"><strong>หมายเหตุการอนุมัติ:</strong> ${comment}</div>` : ''}
-
-      <div class="sig-row" style="margin-top:20px;">
-        <div class="sig-col">
-          <div class="sig-title">ผู้เบิก</div>
-          <div class="sig-sub">Reimburse By</div>
-          <div class="sig-line"></div>
-          <div class="sig-name">( ${d.requestBy||'.............................................'} )</div>
-          <div class="sig-date">${d.requestDate||''}</div>
-        </div>
-        <div class="sig-divider"></div>
-        <div class="sig-col">
-          <div class="sig-title">หัวหน้าส่วน</div>
-          <div class="sig-sub">Department MGR</div>
-          <div class="sig-line"></div>
-          <div class="sig-name">( ${approvedBy || '.............................................'} )</div>
-          <div class="sig-date">${approvedBy ? 'อนุมัติแล้ว' : ''}</div>
-        </div>
-        <div class="sig-divider"></div>
-        <div class="sig-col">
-          <div class="sig-title">กรรมการ</div>
-          <div class="sig-sub">Director</div>
-          <div class="sig-line"></div>
-          <div class="sig-name">( ............................................. )</div>
-          <div class="sig-date"></div>
-        </div>
-      </div>
-    </div>
-  `;
+  document.getElementById('mainContent').innerHTML =
+    '<div class="doc-header">' +
+    '<div><div class="doc-company">Comfy Rooms Hospitality</div><div class="doc-title">ใบขอเบิกค่าใช้จ่าย / Expense Claim Form</div></div>' +
+    '<div><div class="doc-no-label">Doc No.</div><div class="doc-no-value">' + d.docNo + '</div></div>' +
+    '</div>' +
+    '<div class="doc-body">' +
+    '<div class="section-label">ข้อมูลผู้ขอเบิก</div>' +
+    '<div class="info-grid">' +
+    '<div><div class="info-label">ชื่อผู้เบิก</div><div class="info-value">' + (d.requestBy||'-') + '</div></div>' +
+    '<div><div class="info-label">วันที่</div><div class="info-value">' + (d.requestDate||'-') + '</div></div>' +
+    '<div><div class="info-label">ถึง</div><div class="info-value">' + (d.toField||'-') + '</div></div>' +
+    '<div><div class="info-label">สถานะ</div><div class="info-value"><span class="status-badge ' + statusClass + '">' + status + '</span></div></div>' +
+    '<div style="grid-column:span 2"><div class="info-label">วัตถุประสงค์</div><div class="info-value">' + (d.objective||'-') + (d.otherObjective ? ' — ' + d.otherObjective : '') + '</div></div>' +
+    '<div style="grid-column:span 2"><div class="info-label">Project</div><div class="info-value">' + (d.project||'-') + '</div></div>' +
+    '</div>' +
+    '<div class="section-label">รายการค่าใช้จ่าย</div>' +
+    '<table class="items-table"><thead><tr><th style="width:36px">#</th><th>รายการ</th><th class="amt-col">จำนวนเงิน</th><th style="width:150px">หมายเหตุ</th></tr></thead>' +
+    '<tbody>' + itemRows + '</tbody>' +
+    '<tfoot><tr><td colspan="2" class="total-label">รวมทั้งสิ้น</td><td class="total-value">฿ ' + fmt(d.total) + '</td><td></td></tr></tfoot></table>' +
+    (d.comment ? '<div style="margin-top:12px;padding:10px 14px;background:#fff8e1;border-radius:2px;font-size:13px;color:#7a5c00"><strong>หมายเหตุ:</strong> ' + d.comment + '</div>' : '') +
+    receiptsHtml +
+    '<div class="sig-row" style="margin-top:20px">' +
+    '<div class="sig-col"><div class="sig-title">ผู้เบิก</div><div class="sig-sub">Reimburse By</div><div style="height:60px;"></div><div class="sig-line"></div><div class="sig-name">( ' + (d.requestBy||'...............') + ' )</div><div class="sig-date">' + (d.requestDate||'') + '</div></div>' +
+    '<div class="sig-divider"></div>' +
+    '<div class="sig-col"><div class="sig-title">หัวหน้าส่วน</div><div class="sig-sub">Department MGR</div>' + sigHtml + '<div class="sig-line"></div><div class="sig-name">( ' + (d.approvedBy||'...............') + ' )</div><div class="sig-date">' + (d.approvedBy ? 'อนุมัติแล้ว' : '') + '</div></div>' +
+    '<div class="sig-divider"></div>' +
+    '<div class="sig-col"><div class="sig-title">กรรมการ</div><div class="sig-sub">Director</div><div style="height:60px;"></div><div class="sig-line"></div><div class="sig-name">( ............... )</div><div class="sig-date"></div></div>' +
+    '</div></div>';
 
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
-  document.title = 'Expense Claim ' + d.docNo;
+  document.title = 'Expense ' + d.docNo;
 }
 
 function showError(msg) {
