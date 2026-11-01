@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hotel Health Check | Alphatel Partner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14263a; --muted:#5d6d7e; --line:#dde4ea; --bg:#f4f7f9; --card:#ffffff;
+    --brand:#0f6e6e; --brand-dark:#0a4f4f; --brand-soft:#e3f1f1;
+    --warn:#b4540a; --warn-soft:#fdf0e3; --good:#1b7a43; --bad:#b3261e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:'Noto Sans Thai',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;-webkit-text-size-adjust:100%}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 48px}
+  header.top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px}
+  .logo{font-weight:700;letter-spacing:.2px;color:var(--brand-dark)}
+  .logo small{display:block;font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 20px}
+  h1{font-size:26px;line-height:1.3;margin:0 0 10px}
+  h2{font-size:20px;line-height:1.4;margin:0 0 6px}
+  h3{font-size:16px;margin:0 0 4px}
+  p{margin:0 0 12px}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  .btn{display:inline-block;border:0;border-radius:12px;padding:13px 20px;font:inherit;font-weight:500;cursor:pointer;text-decoration:none;text-align:center}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.primary:hover{background:var(--brand-dark)}
+  .btn.ghost{background:transparent;color:var(--brand-dark);border:1px solid var(--line)}
+  .btn.block{display:block;width:100%}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .progress{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:0 0 18px}
+  .progress>i{display:block;height:100%;background:var(--brand);transition:width .25s}
+  .section-tag{display:inline-block;font-size:12px;background:var(--brand-soft);color:var(--brand-dark);padding:2px 10px;border-radius:999px;margin-bottom:10px}
+  .opts{display:grid;gap:10px;margin-top:14px}
+  .opt{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;font:inherit;color:var(--ink);cursor:pointer;transition:border-color .12s,background .12s}
+  .opt:hover{border-color:var(--brand)}
+  .opt.sel{border-color:var(--brand);background:var(--brand-soft)}
+  .opt small{display:block;color:var(--muted);font-size:13px}
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+  .linkbtn{background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;padding:6px 0}
+  ul.clean{list-style:none;margin:0;padding:0}
+  ul.clean li{padding:0 0 10px}
+  .score-big{display:flex;align-items:baseline;gap:6px}
+  .score-big b{font-size:56px;line-height:1;color:var(--brand-dark)}
+  .score-big span{color:var(--muted)}
+  .pill{display:inline-block;padding:3px 12px;border-radius:999px;font-size:13px;font-weight:500}
+  .pill.good{background:#e5f4ea;color:var(--good)}
+  .pill.mid{background:var(--warn-soft);color:var(--warn)}
+  .pill.bad{background:#fbe9e7;color:var(--bad)}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-weight:500;margin-bottom:4px}
+  .field input[type=text],.field input[type=tel],.field input[type=email]{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .field select{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .field select:focus,.field input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+  .err{color:var(--bad);font-size:13px;margin-top:4px;min-height:0}
+  .check{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted)}
+  .check input{margin-top:5px}
+  .rec{border-left:5px solid var(--brand);background:var(--brand-soft)}
+  .bars .row{display:grid;grid-template-columns:128px 1fr 34px;gap:8px;align-items:center;margin:6px 0;font-size:14px}
+  .bars .track{height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+  .bars .track i{display:block;height:100%;border-radius:6px}
+  .stack>*+*{margin-top:14px}
+  pre.debug{background:#10202e;color:#cfe3f1;padding:12px;border-radius:10px;overflow:auto;font-size:12px;line-height:1.5}
+  .notice{font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px}
+  footer{margin-top:24px;text-align:center;font-size:12px;color:var(--muted)}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">Hotel Health Check<small>by Alphatel Partner</small></div>
+    <div class="small muted" id="stepLabel"></div>
+  </header>
+  <main id="app" aria-live="polite"></main>
+  <footer>ผลที่ได้เป็นการประเมินเบื้องต้นจากคำตอบของคุณ ไม่ใช่การรับประกันผลลัพธ์ทางธุรกิจ</footer>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — ปรับค่าตรงนี้ได้โดยไม่ต้องแตะโค้ดส่วนอื่น
+   ===================================================================== */
+const CONFIG = {
+  // URL ของ Google Apps Script Web App (หรือ endpoint อื่น) ที่รับ Lead. ถ้าเว้นว่างจะไม่ส่งข้อมูล (โหมดทดสอบ)
+  endpoint: 'https://script.google.com/macros/s/AKfycbzNOm_o0rcwQU-laBFPNHXCnKQGeO_SeCL819-9gJBGdP_fMPUTbEiQonSZqC4drbO3yg/exec',
+  // ลิงก์ปุ่ม CTA (ใส่ลิงก์จริงก่อนใช้งาน)
+  links: {
+    talk:    'https://lin.ee/Qnhzr2d',   // นัดคุยกับทีม Alpha Revenue Management (เช่น LINE OA)
+    academy: 'https://partner.alphatel.asia/alpha-academy/',   // หน้าคอร์ส Alpha Academy
+    page:    'https://www.facebook.com/ajarnkitt'    // เพจ ปั้นรายได้โรงแรม โดย อ.กิต
+  },
+  // เกณฑ์ Lead เกรด A
+  grade: { minRooms: 20, strongRooms: 30, adrForSmall: 1500 },
+  // เกณฑ์เส้นทาง
+  route: { capHigh: 70, capLow: 45, healthLow: 40, weakAxis: 50 }  // weakAxis: คะแนนช่องทางตรง (IBE) ต่ำกว่านี้ = แนะนำแพ็กเกจที่รวมเว็บไซต์
+};
+
+const PROVINCES = ["กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร", "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ชัยนาท", "ชัยภูมิ", "ชุมพร", "เชียงราย", "เชียงใหม่", "ตรัง", "ตราด", "ตาก", "นครนายก", "นครปฐม", "นครพนม", "นครราชสีมา", "นครศรีธรรมราช", "นครสวรรค์", "นนทบุรี", "นราธิวาส", "น่าน", "บึงกาฬ", "บุรีรัมย์", "ปทุมธานี", "ประจวบคีรีขันธ์", "ปราจีนบุรี", "ปัตตานี", "พระนครศรีอยุธยา", "พะเยา", "พังงา", "พัทลุง", "พิจิตร", "พิษณุโลก", "เพชรบุรี", "เพชรบูรณ์", "แพร่", "ภูเก็ต", "มหาสารคาม", "มุกดาหาร", "แม่ฮ่องสอน", "ยโสธร", "ยะลา", "ร้อยเอ็ด", "ระนอง", "ระยอง", "ราชบุรี", "ลพบุรี", "ลำปาง", "ลำพูน", "เลย", "ศรีสะเกษ", "สกลนคร", "สงขลา", "สตูล", "สมุทรปราการ", "สมุทรสงคราม", "สมุทรสาคร", "สระแก้ว", "สระบุรี", "สิงห์บุรี", "สุโขทัย", "สุพรรณบุรี", "สุราษฎร์ธานี", "สุรินทร์", "หนองคาย", "หนองบัวลำภู", "อ่างทอง", "อำนาจเจริญ", "อุดรธานี", "อุตรดิตถ์", "อุทัยธานี", "อุบลราชธานี"];  // 77 จังหวัด (รวมกรุงเทพมหานคร)
+
+/* =====================================================================
+   คำถาม (13 ข้อ)
+   ===================================================================== */
+const QUESTIONS = [
+  { id:'rooms', section:'โปรไฟล์โรงแรม', text:'โรงแรมของคุณมีกี่ห้อง?', options:[
+    {v:'lt10',l:'น้อยกว่า 10 ห้อง'},{v:'10_19',l:'10–19 ห้อง'},{v:'20_29',l:'20–29 ห้อง'},{v:'30_80',l:'30–80 ห้อง'},{v:'80p',l:'มากกว่า 80 ห้อง'}]},
+  { id:'type', section:'โปรไฟล์โรงแรม', text:'โรงแรมของคุณเป็นลักษณะไหนมากที่สุด?', options:[
+    {v:'city',l:'โรงแรมในเมือง / ธุรกิจ'},{v:'resort',l:'รีสอร์ท / ท่องเที่ยวพักผ่อน'},{v:'boutique',l:'บูติก / โฮมสเตย์ / ที่พักขนาดเล็ก'},{v:'hostel',l:'โฮสเทล'},{v:'other',l:'อื่น ๆ'}]},
+  { id:'adr', section:'โปรไฟล์โรงแรม', text:'ราคาห้องเฉลี่ยต่อคืน (ADR) ประมาณเท่าไหร่?', hint:'ตอบเป็นช่วงคร่าว ๆ ก็พอ', options:[
+    {v:'lt800',l:'ต่ำกว่า 800 บาท'},{v:'800_1499',l:'800–1,499 บาท'},{v:'1500_2499',l:'1,500–2,499 บาท'},{v:'2500p',l:'2,500 บาทขึ้นไป'}]},
+  { id:'role', section:'โปรไฟล์โรงแรม', text:'คุณคือใครในโรงแรมนี้?', options:[
+    {v:'owner',l:'เจ้าของ / ผู้ถือหุ้น'},{v:'manager',l:'ผู้จัดการ / ผู้บริหารที่ตัดสินใจเรื่องการขายได้'},{v:'staff',l:'พนักงาน / ผู้ช่วย'}]},
+
+  { id:'trend', section:'สุขภาพยอดขาย', text:'อัตราการเข้าพัก (OCC) ช่วง 12 เดือนที่ผ่านมา เทียบกับปีก่อนเป็นอย่างไร?', options:[
+    {v:'up',l:'ดีขึ้น'},{v:'same',l:'ใกล้เคียงเดิม'},{v:'slight_down',l:'ลดลงเล็กน้อย'},{v:'down',l:'ลดลงมาก'}]},
+  { id:'mix', section:'สุขภาพยอดขาย', text:'ยอดขายห้องพักส่วนใหญ่มาจากช่องทางไหน?', options:[
+    {v:'ota80',l:'เกือบทั้งหมดมาจาก OTA', sub:'มากกว่า 80%'},{v:'ota60',l:'ส่วนใหญ่มาจาก OTA', sub:'60–80%'},{v:'ota40',l:'OTA และช่องทางตรงพอ ๆ กัน', sub:'40–60% มาจาก OTA'},{v:'ota_low',l:'ช่องทางตรงเป็นหลัก', sub:'OTA ต่ำกว่า 40%'}]},
+  { id:'ibe', section:'สุขภาพยอดขาย', text:'โรงแรมมีเว็บไซต์ที่ให้ลูกค้าจองและจ่ายเงินได้เองหรือไม่ (IBE)?', options:[
+    {v:'none',l:'ยังไม่มีเว็บไซต์'},{v:'site_only',l:'มีเว็บไซต์ แต่จองไม่ได้ (ต้องทักแชท / โทร)'},{v:'ibe_weak',l:'มีระบบจองบนเว็บไซต์ แต่แทบไม่มีคนจอง'},{v:'ibe_good',l:'มีระบบจอง และได้ยอดจองสม่ำเสมอ'}]},
+
+  { id:'manager', section:'ความพร้อมของทีม', text:'ใครดูแลราคาและการขายบน OTA อยู่ตอนนี้?', options:[
+    {v:'dedicated',l:'พนักงานที่รับผิดชอบเรื่องนี้โดยเฉพาะ'},{v:'owner',l:'เจ้าของ / ผู้จัดการทำเองควบกับงานอื่น'},{v:'frontdesk',l:'พนักงานต้อนรับทำควบ'},{v:'nobody',l:'ยังไม่มีใครดูแลเป็นหลัก'}]},
+  { id:'routine', section:'ความพร้อมของทีม', text:'คุณดูคู่แข่ง คาดการณ์ยอดจอง และปรับราคาตามช่วงเวลาบ่อยแค่ไหน?', options:[
+    {v:'regular',l:'ทำเป็นประจำ ทุกสัปดาห์หรือบ่อยกว่า'},{v:'sometimes',l:'ทำบ้างเป็นบางครั้ง'},{v:'never',l:'แทบไม่ได้ทำ ตั้งราคาตามความรู้สึก'}]},
+  { id:'tools', section:'ความพร้อมของทีม', text:'ตอนนี้ใช้เครื่องมือบริหารห้องพักอะไรอยู่?', options:[
+    {v:'pms_cm',l:'มีทั้งระบบ PMS และ Channel Manager'},{v:'cm',l:'มี Channel Manager'},{v:'pms',l:'มี PMS อย่างเดียว'},{v:'none',l:'ยังไม่มี ใช้ Extranet ของแต่ละ OTA หรือจดมือ'}]},
+
+  { id:'pref', section:'สิ่งที่คุณต้องการ', text:'คุณอยากได้ความช่วยเหลือรูปแบบไหน?', options:[
+    {v:'do_for_me',l:'อยากให้มีทีมมืออาชีพทำให้'},{v:'learn_self',l:'อยากให้ทีมของเราเก่งขึ้นและทำเองได้'},{v:'both',l:'อยากได้ทั้งสองอย่าง เรียนรู้ไปพร้อมมีคนช่วย'}]},
+  { id:'time', section:'สิ่งที่คุณต้องการ', text:'คุณและทีมมีเวลาให้กับเรื่องการขายและราคาต่อสัปดาห์ประมาณเท่าไหร่?', options:[
+    {v:'lt1',l:'น้อยกว่า 1 ชั่วโมง'},{v:'1_3',l:'1–3 ชั่วโมง'},{v:'3_8',l:'3–8 ชั่วโมง'},{v:'8p',l:'มากกว่า 8 ชั่วโมง'}]},
+  { id:'goal', section:'สิ่งที่คุณต้องการ', text:'เป้าหมายสำคัญที่สุดใน 6 เดือนข้างหน้าคืออะไร?', options:[
+    {v:'revenue',l:'เพิ่มยอดขายและรายได้'},{v:'commission',l:'ลดการพึ่งพา OTA และค่าคอมมิชชัน'},{v:'workload',l:'ลดภาระงานของตัวเอง'}]}
+];
+
+/* =====================================================================
+   ตารางคะแนน (0–100) และน้ำหนักของแต่ละแกน — แก้ได้ที่นี่
+   ===================================================================== */
+const SCORING = {
+  trend:   { up:100, same:65, slight_down:35, down:10 },
+  mix:     { ota80:10, ota60:35, ota40:65, ota_low:90 },
+  ibe:     { none:0, site_only:25, ibe_weak:55, ibe_good:90 },
+  manager: { dedicated:80, owner:45, frontdesk:35, nobody:5 },
+  routine: { regular:90, sometimes:50, never:10 },
+  tools:   { pms_cm:90, cm:65, pms:40, none:10 }
+};
+const AXES = {
+  OTA:        { label:'การขายบน OTA', short:'OTA',        parts:[['manager',.4],['routine',.3],['tools',.3]] },
+  IBE:        { label:'ช่องทางตรง (IBE)', short:'ช่องทางตรง', parts:[['mix',.45],['ibe',.55]] },
+  DISCIPLINE: { label:'วินัยการตั้งราคา', short:'วินัยราคา', parts:[['routine',.6],['tools',.2],['trend',.2]] }
+};
+const CAPABILITY = [['manager',.4],['routine',.35],['tools',.25]];
+const TREND_WEIGHT = 0.2;
+
+const AXIS_FINDING = {
+  OTA:        'การดูแล OTA ยังไม่เป็นระบบ ราคาและจำนวนห้องที่เปิดขายอาจไม่ได้ปรับตามความต้องการจริง ทำให้เสียโอกาสในช่วงที่ขายได้ราคาดี',
+  IBE:        'พึ่ง OTA สูงหรือเว็บไซต์จองตรงยังไม่ช่วยปิดการขาย ทำให้จ่ายค่าคอมมิชชันมากกว่าที่จำเป็น และไม่มีฐานลูกค้าตรงของตัวเอง',
+  DISCIPLINE: 'ยังขาดวินัยในการดูคู่แข่งและคาดการณ์ยอดจอง ทำให้ตั้งราคาตามความรู้สึกมากกว่าข้อมูล'
+};
+
+/* =====================================================================
+   Logic (ฟังก์ชันล้วน ทดสอบได้)
+   ===================================================================== */
+const ROOMS_MIN = { lt10:0, '10_19':10, '20_29':20, '30_80':30, '80p':81 };
+const ADR_MIN   = { lt800:0, '800_1499':800, '1500_2499':1500, '2500p':2500 };
+
+function weighted(parts, answers){
+  let s = 0, w = 0;
+  for (const [q, wt] of parts){
+    const v = SCORING[q][answers[q]];
+    if (v === undefined) continue;
+    s += v * wt; w += wt;
+  }
+  return w ? s / w : 0;
+}
+
+function evaluate(a){
+  const axes = {};
+  for (const k in AXES) axes[k] = Math.round(weighted(AXES[k].parts, a));
+  const capability = Math.round(weighted(CAPABILITY, a));
+  const avg = Object.values(axes).reduce((x,y)=>x+y,0) / Object.keys(axes).length;
+  const trend = SCORING.trend[a.trend] ?? 50;
+  const health = Math.round(TREND_WEIGHT * trend + (1 - TREND_WEIGHT) * avg);
+
+  const R = CONFIG.route;
+  const lowTime = a.time === 'lt1' || a.time === '1_3';
+  const noCM = a.tools === 'none' || a.tools === 'pms';
+  const ibeWeak = axes.IBE < R.weakAxis;
+  const rmProduct = ibeWeak ? 'RMW' : 'RM';   // RM = Alpha Revenue Management, RMW = Alpha Revenue & Website Management
+
+  let route, reason, addon = null;
+  if (a.rooms === 'lt10' && noCM){
+    route = 'D'; reason = 'small_no_cm';
+  } else if (capability >= R.capHigh && ibeWeak){
+    route = 'RMW'; reason = 'strong_team_weak_ibe';
+  } else if (a.manager === 'nobody' && lowTime){
+    route = rmProduct; reason = 'nobody_no_time';
+  } else if (a.pref === 'do_for_me'){
+    route = rmProduct; reason = 'wants_done';
+  } else if (a.pref === 'learn_self' && health < R.healthLow && capability < R.capLow){
+    route = 'HYB'; addon = rmProduct; reason = 'weak_but_learn';
+  } else if (a.pref === 'both'){
+    route = 'HYB'; addon = rmProduct; reason = 'wants_both';
+  } else {
+    route = 'ACA'; reason = a.manager === 'dedicated' ? 'has_staff_learn' : 'wants_learn';
+  }
+
+  const decisionMaker = a.role === 'owner' || a.role === 'manager';
+  const G = CONFIG.grade;
+  const rooms = ROOMS_MIN[a.rooms] ?? 0;
+  const adr   = ADR_MIN[a.adr] ?? 0;
+  const sizeOK = rooms >= G.minRooms && (rooms >= G.strongRooms || adr >= G.adrForSmall);
+
+  let grade;
+  if (route === 'D') grade = 'D';
+  else if ((route === 'RM' || route === 'RMW' || route === 'HYB') && decisionMaker && sizeOK) grade = 'A';
+  else if (rooms >= 10) grade = 'B';
+  else grade = 'C';
+
+  return { axes, capability, health, route, addon, reason, grade, sizeOK, decisionMaker };
+}
+
+/* =====================================================================
+   ข้อความผลลัพธ์
+   ===================================================================== */
+const ROUTES = {
+  RM:  { name:'Alpha Revenue Management', tag:'ให้ทีมมืออาชีพช่วยดูแลยอดขายออนไลน์',
+         body:'เราช่วยวางกลยุทธ์ราคา ดูแลการขายห้องพักบน OTA และรายงานผลสม่ำเสมอ เพื่อให้คุณโฟกัสงานบริการ โดยไม่ต้องจ้างคนดูแลเรื่องนี้เพิ่ม',
+         cta:{label:'นัดคุยกับทีม Alpha Revenue Management', link:'talk'} },
+  RMW: { name:'Alpha Revenue & Website Management', tag:'ดูแลยอดขายออนไลน์ พร้อมเว็บไซต์จองตรง',
+         body:'นอกจากวางกลยุทธ์ราคาและดูแลการขายบน OTA แล้ว เรายังดูแลเว็บไซต์และระบบจองตรง (IBE) เพื่อเพิ่มยอดจองที่ไม่ผ่านคนกลาง และลดการพึ่งพา OTA และค่าคอมมิชชันในระยะยาว',
+         cta:{label:'นัดคุยกับทีม Alpha Revenue & Website Management', link:'talk'} },
+  ACA: { name:'คอร์ส Alpha Academy', tag:'ทำให้ทีมของคุณเก่งขึ้นและทำเองได้',
+         body:'โรงแรมของคุณมีฐานพร้อมแล้ว สิ่งที่ขาดคือความรู้และวิธีทำงานที่เป็นระบบ คอร์สจะช่วยให้ทีมดูแล OTA ตั้งราคา และอ่านตัวเลขได้เอง',
+         cta:{label:'ดูคอร์สของ Alpha Academy', link:'academy'} },
+  HYB: { name:'เริ่มจาก Alpha Academy', tag:'เรียนรู้ไปพร้อมมีผู้ช่วย',
+         body:'ทีมของคุณควรได้รับความรู้พื้นฐานก่อน ขณะเดียวกันก็ยังมีบางส่วนที่ควรให้ผู้เชี่ยวชาญช่วยเร่ง เราแนะนำให้เริ่มเรียน และคุยกับทีมเพื่อวางแผนต่อยอดไปพร้อมกัน',
+         cta:{label:'นัดคุยเพื่อวางแผนร่วมกัน', link:'talk'}, cta2:{label:'ดูคอร์สของ Alpha Academy', link:'academy'} },
+  D:   { name:'เริ่มจากพื้นฐานก่อน', tag:'ยังไม่ถึงเวลาจ้างบริการ',
+         body:'ด้วยขนาดและระบบที่มีตอนนี้ การลงทุนกับบริการเต็มรูปแบบอาจยังไม่คุ้ม เริ่มจากวางระบบพื้นฐาน เช่น Channel Manager และติดตามความรู้เรื่อง OTA จากเพจของเราไปก่อน',
+         cta:{label:'ติดตามเพจ ปั้นรายได้โรงแรม โดย อ.กิต', link:'page'} }
+};
+const REASONS = {
+  small_no_cm:'โรงแรมขนาดเล็กมากและยังไม่มี Channel Manager',
+  strong_team_weak_ibe:'ทีมของคุณมีพื้นฐานดี สิ่งที่ยังอ่อนคือช่องทางจองตรงและเว็บไซต์ ซึ่งเป็นส่วนที่เราช่วยได้เร็วที่สุด',
+  nobody_no_time:'ตอนนี้ยังไม่มีคนดูแลเป็นหลัก และเวลาที่ใส่ได้ต่อสัปดาห์ค่อนข้างน้อย',
+  wants_done:'คุณต้องการให้มีทีมมืออาชีพช่วยทำให้',
+  weak_but_learn:'ภาพรวมยังอ่อนและทีมยังขาดพื้นฐาน แต่คุณพร้อมเรียนรู้ จึงควรเริ่มจากความรู้ควบคู่ผู้ช่วย',
+  wants_both:'คุณต้องการทั้งการเรียนรู้และมีคนช่วย',
+  has_staff_learn:'คุณมีพนักงานรับผิดชอบอยู่แล้ว สิ่งที่ขาดคือความรู้',
+  wants_learn:'คุณต้องการให้ทีมทำเองได้'
+};
+
+/* =====================================================================
+   UI
+   ===================================================================== */
+const app = document.getElementById('app');
+const stepLabel = document.getElementById('stepLabel');
+const state = { i:-1, answers:{}, result:null, lead:null };
+const DEBUG = /(^|[?&])debug=1/.test(location.search) || location.hash === '#debug';
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function tone(n){ return n >= 70 ? 'good' : n >= 45 ? 'mid' : 'bad'; }
+function toneLabel(n){ return n >= 70 ? 'ค่อนข้างแข็งแรง' : n >= 45 ? 'ควรปรับปรุง' : 'ต้องรีบดูแล'; }
+function toneColor(n){ return n >= 70 ? '#1b7a43' : n >= 45 ? '#d9822b' : '#b3261e'; }
+
+function render(){
+  if (state.i === -1) return renderIntro();
+  if (state.i < QUESTIONS.length) return renderQuestion();
+  if (state.i === QUESTIONS.length) return renderGate();
+  return renderResult();
+}
+
+function renderIntro(){
+  stepLabel.textContent = '';
+  app.innerHTML = `
+    <section class="card stack">
+      <h1>โรงแรมของคุณสุขภาพดีแค่ไหน?</h1>
+      <p class="muted">ตอบ ${QUESTIONS.length} คำถามสั้น ๆ ใช้เวลาประมาณ 3–4 นาที แล้วรับผลวินิจฉัยเบื้องต้นว่าช่องทางไหนของโรงแรมควรปรับปรุงก่อน และบริการแบบไหนเหมาะกับคุณ</p>
+      <ul class="clean small muted">
+        <li>✔ ไม่ต้องใช้ตัวเลขที่แม่นยำ ตอบคร่าว ๆ ได้</li>
+        <li>✔ ฟรี ไม่มีข้อผูกมัด</li>
+      </ul>
+      <button class="btn primary block" id="start">เริ่มตรวจสุขภาพโรงแรม</button>
+    </section>`;
+  document.getElementById('start').onclick = () => { state.i = 0; render(); };
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[state.i];
+  const total = QUESTIONS.length;
+  stepLabel.textContent = `ข้อ ${state.i + 1} / ${total}`;
+  const cur = state.answers[q.id];
+  app.innerHTML = `
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${state.i}"><i style="width:${(state.i / total) * 100}%"></i></div>
+    <section class="card">
+      <span class="section-tag">${esc(q.section)}</span>
+      <h2>${esc(q.text)}</h2>
+      ${q.hint ? `<p class="muted small">${esc(q.hint)}</p>` : ''}
+      <div class="opts" role="radiogroup">
+        ${q.options.map(o => `<button class="opt ${cur === o.v ? 'sel' : ''}" role="radio" aria-checked="${cur === o.v}" data-v="${o.v}">${esc(o.l)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}</button>`).join('')}
+      </div>
+      <div class="nav">
+        <button class="linkbtn" id="back" ${state.i === 0 ? 'style="visibility:hidden"' : ''}>← ย้อนกลับ</button>
+        <button class="btn ghost" id="next" ${cur ? '' : 'disabled'}>ถัดไป</button>
+      </div>
+    </section>`;
+  app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    state.answers[q.id] = b.dataset.v;
+    app.querySelectorAll('.opt').forEach(x => { x.classList.toggle('sel', x === b); x.setAttribute('aria-checked', x === b); });
+    document.getElementById('next').disabled = false;
+    setTimeout(() => { if (state.i < QUESTIONS.length && QUESTIONS[state.i].id === q.id) { state.i++; render(); } }, 220);
+  });
+  document.getElementById('next').onclick = () => { state.i++; render(); };
+  document.getElementById('back').onclick = () => { state.i--; render(); };
+}
+
+function radarSVG(axes){
+  const keys = Object.keys(AXES), n = keys.length, cx = 180, cy = 135, R = 88;
+  const pt = (i, r) => { const a = -Math.PI/2 + (2*Math.PI*i)/n; return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; };
+  const ring = f => keys.map((_,i) => pt(i, R*f).join(',')).join(' ');
+  const poly = keys.map((k,i) => pt(i, R * axes[k]/100).join(',')).join(' ');
+  const labels = keys.map((k,i) => {
+    const [x,y] = pt(i, R + 16);
+    const anchor = Math.abs(x - cx) < 4 ? 'middle' : x > cx ? 'start' : 'end';
+    return `<text x="${x}" y="${y + 4}" text-anchor="${anchor}" font-size="12" fill="#14263a">${esc(AXES[k].short)}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 360 270" width="100%" role="img" aria-label="กราฟสุขภาพรายช่องทาง">
+    ${[.25,.5,.75,1].map(f => `<polygon points="${ring(f)}" fill="none" stroke="#dde4ea"/>`).join('')}
+    ${keys.map((_,i) => `<line x1="${cx}" y1="${cy}" x2="${pt(i,R)[0]}" y2="${pt(i,R)[1]}" stroke="#dde4ea"/>`).join('')}
+    <polygon points="${poly}" fill="rgba(15,110,110,.22)" stroke="#0f6e6e" stroke-width="2"/>
+    ${keys.map((k,i) => `<circle cx="${pt(i,R*axes[k]/100)[0]}" cy="${pt(i,R*axes[k]/100)[1]}" r="3.5" fill="#0f6e6e"/>`).join('')}
+    ${labels}
+  </svg>`;
+}
+
+function renderGate(){
+  stepLabel.textContent = 'เกือบเสร็จแล้ว';
+  state.result = evaluate(state.answers);
+  const r = state.result;
+  const weakest = Object.keys(r.axes).sort((a,b) => r.axes[a] - r.axes[b])[0];
+  app.innerHTML = `
+    <div class="progress"><i style="width:100%"></i></div>
+    <section class="card stack">
+      <span class="section-tag">สรุปเบื้องต้น</span>
+      <div class="score-big"><b>${r.health}</b><span>/ 100 คะแนนสุขภาพโดยรวม</span></div>
+      <span class="pill ${tone(r.health)}">${toneLabel(r.health)}</span>
+      <p>จุดที่ควรดูแลก่อนคือ <b>${esc(AXES[weakest].label)}</b> กรอกข้อมูลติดต่อเพื่อดูผลละเอียด กราฟรายช่องทาง และคำแนะนำบริการที่เหมาะกับโรงแรมของคุณ</p>
+      <form id="lead" novalidate>
+        <div class="field"><label for="f_name">ชื่อ-นามสกุล</label><input type="text" id="f_name" autocomplete="name"><div class="err" id="e_name"></div></div>
+        <div class="field"><label for="f_hotel">ชื่อโรงแรม</label><input type="text" id="f_hotel" autocomplete="organization"><div class="err" id="e_hotel"></div></div>
+        <div class="field"><label for="f_phone">เบอร์โทรหรือ LINE ID</label><input type="text" id="f_phone" autocomplete="tel"><div class="err" id="e_phone"></div></div>
+        <div class="field"><label for="f_email">อีเมล</label><input type="email" id="f_email" autocomplete="email" inputmode="email"><div class="err" id="e_email"></div></div>
+        <div class="field"><label for="f_prov">จังหวัดที่ตั้งโรงแรม</label><select id="f_prov"><option value="">เลือกจังหวัด</option>${PROVINCES.map(x => `<option value="${x}">${x}</option>`).join('')}</select><div class="err" id="e_prov"></div></div>
+        <label class="check"><input type="checkbox" id="f_consent"><span>ยินยอมให้ Alphatel Partner เก็บและใช้ข้อมูลนี้เพื่อติดต่อกลับเกี่ยวกับผลการประเมินและบริการที่เกี่ยวข้อง</span></label>
+        <div class="err" id="e_consent"></div>
+        <button class="btn primary block" type="submit" style="margin-top:14px" id="submit">ดูผลละเอียด</button>
+      </form>
+    </section>`;
+  document.getElementById('lead').onsubmit = e => { e.preventDefault(); submitLead(); };
+}
+
+function submitLead(){
+  const v = id => document.getElementById(id).value.trim();
+  const set = (id, msg) => { document.getElementById(id).textContent = msg; return !msg; };
+  let ok = true;
+  ok = set('e_name',  v('f_name')  ? '' : 'กรุณากรอกชื่อ') && ok;
+  ok = set('e_hotel', v('f_hotel') ? '' : 'กรุณากรอกชื่อโรงแรม') && ok;
+  ok = set('e_email', /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('f_email')) ? '' : 'กรุณากรอกอีเมลให้ถูกต้อง เช่น name@hotel.com') && ok;
+  ok = set('e_prov',  v('f_prov')  ? '' : 'กรุณาเลือกจังหวัดที่ตั้งโรงแรม') && ok;
+  ok = set('e_phone', v('f_phone').length >= 4 ? '' : 'กรุณากรอกเบอร์โทรหรือ LINE ID') && ok;
+  ok = set('e_consent', document.getElementById('f_consent').checked ? '' : 'กรุณาติ๊กยินยอมก่อนดูผล') && ok;
+  if (!ok) return;
+
+  const q = new URLSearchParams(location.search);
+  const utm = {};
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid'].forEach(k => { if (q.get(k)) utm[k] = q.get(k); });
+  state.lead = { name:v('f_name'), hotel:v('f_hotel'), contact:v('f_phone'), email:v('f_email'), province:v('f_prov') };
+  state.payload = {
+    ts: new Date().toISOString(), source:'hotel-health-check-partner',
+    lead: state.lead, answers: state.answers, result: state.result, utm
+  };
+  document.getElementById('submit').disabled = true;
+  sendPayload(state.payload).finally(() => { state.i = QUESTIONS.length + 1; render(); window.scrollTo(0,0); });
+}
+
+async function sendPayload(p){
+  if (!CONFIG.endpoint) { console.info('[HHC] endpoint ว่าง ไม่ส่งข้อมูล', p); return; }
+  try {
+    await fetch(CONFIG.endpoint, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(p) });
+  } catch (err) { console.warn('[HHC] ส่งข้อมูลไม่สำเร็จ', err); }
+}
+
+function renderResult(){
+  stepLabel.textContent = 'ผลการตรวจ';
+  const r = state.result; let route = ROUTES[r.route];
+  if (r.route === 'HYB') route = { ...route, name: 'เริ่มจาก Alpha Academy แล้วต่อยอดด้วย ' + ROUTES[r.addon].name };
+  const sorted = Object.keys(r.axes).sort((a,b) => r.axes[a] - r.axes[b]);
+  const findings = sorted.filter(k => r.axes[k] < 60).slice(0,3);
+  const cta = c => `<a class="btn primary block" href="${esc(CONFIG.links[c.link])}" target="_blank" rel="noopener">${esc(c.label)}</a>`;
+  app.innerHTML = `
+    <div class="stack">
+      <section class="card">
+        <p class="muted small" style="margin-bottom:4px">สวัสดีคุณ ${esc(state.lead.name)} · ${esc(state.lead.hotel)}</p>
+        <div class="score-big"><b>${r.health}</b><span>/ 100 คะแนนสุขภาพโดยรวม</span></div>
+        <span class="pill ${tone(r.health)}">${toneLabel(r.health)}</span>
+        ${radarSVG(r.axes)}
+        <div class="bars">
+          ${Object.keys(AXES).map(k => `<div class="row"><span>${esc(AXES[k].label)}</span><div class="track"><i style="width:${r.axes[k]}%;background:${toneColor(r.axes[k])}"></i></div><b>${r.axes[k]}</b></div>`).join('')}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>${findings.length ? 'สิ่งที่ควรดูแลก่อน' : 'ภาพรวมค่อนข้างแข็งแรง'}</h2>
+        ${findings.length ? `<ul class="clean">${findings.map(k => `<li><h3>${esc(AXES[k].label)} <span class="pill ${tone(r.axes[k])}">${r.axes[k]}</span></h3><span class="muted">${esc(AXIS_FINDING[k])}</span></li>`).join('')}</ul>`
+                          : `<p class="muted">ทุกช่องทางอยู่ในระดับที่ดี สิ่งที่ทำต่อได้คือเพิ่มประสิทธิภาพให้ลึกขึ้น เช่น กลยุทธ์ราคาและการจัดสรรห้องตามช่องทาง</p>`}
+      </section>
+
+      <section class="card rec">
+        <span class="section-tag" style="background:#fff">บริการที่เหมาะกับโรงแรมของคุณ</span>
+        <h2>${esc(route.name)}</h2>
+        <p><b>${esc(route.tag)}</b></p>
+        <p>${esc(route.body)}</p>
+        <p class="muted small">เหตุผล: ${esc(REASONS[r.reason])}</p>
+        <div class="stack">${cta(route.cta)}${route.cta2 ? cta(route.cta2) : ''}</div>
+      </section>
+
+      ${DEBUG ? `<section class="card"><h3>สำหรับทีมงาน (debug)</h3><p class="small">เส้นทาง ${r.route} · เกรด Lead ${r.grade} · Capability ${r.capability}${CONFIG.endpoint ? '' : ' · <span class="notice">ยังไม่ได้ตั้ง endpoint</span>'}</p><pre class="debug">${esc(JSON.stringify(state.payload, null, 2))}</pre></section>` : ''}
+      <button class="btn ghost block" id="again">ตรวจใหม่อีกครั้ง</button>
+    </div>`;
+  document.getElementById('again').onclick = () => { state.i = -1; state.answers = {}; state.result = null; render(); window.scrollTo(0,0); };
+}
+
+window.HHC = { CONFIG, QUESTIONS, evaluate };
+render();
+</script>
+</body>
+</html>
